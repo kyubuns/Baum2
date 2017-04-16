@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System.Collections.Generic;
 using OnionRing;
 
 namespace Baum2.Editor
@@ -91,6 +92,7 @@ namespace Baum2.Editor
 
 			var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(asset);
 			var slicedTexture = TextureSlicer.Slice(texture);
+			if (PreprocessTexture.SlicedTextures == null) PreprocessTexture.SlicedTextures = new Dictionary<string, SlicedTexture>();
 			PreprocessTexture.SlicedTextures[fileName] = slicedTexture;
 			byte[] pngData = slicedTexture.Texture.EncodeToPNG();
 			File.WriteAllBytes(newPath, pngData);

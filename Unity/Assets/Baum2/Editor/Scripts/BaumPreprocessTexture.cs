@@ -10,7 +10,7 @@ namespace Baum2.Editor
 	{
 		public override int GetPostprocessOrder() { return 990; }
 
-		public static Dictionary<string, SlicedTexture> SlicedTextures = new Dictionary<string, SlicedTexture>();
+		public static Dictionary<string, SlicedTexture> SlicedTextures;
 
 		public void OnPreprocessTexture()
 		{
@@ -39,6 +39,8 @@ namespace Baum2.Editor
 #else
 				importer.textureFormat = TextureImporterFormat.ARGB32;
 #endif
+				SlicedTextures.Remove(fileName);
+				if (SlicedTextures.Count == 0) SlicedTextures = null;
 			}
 		}
 	}
