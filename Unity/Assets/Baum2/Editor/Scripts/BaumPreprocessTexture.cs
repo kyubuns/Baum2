@@ -34,7 +34,11 @@ namespace Baum2.Editor
 				importer.isReadable = false;
 				importer.spriteBorder = SlicedTextures[fileName].Boarder.ToVector4();
 				importer.filterMode = FilterMode.Bilinear;
+#if UNITY_5_5_OR_NEWER
+				importer.textureCompression = TextureImporterCompression.Uncompressed;
+#else
 				importer.textureFormat = TextureImporterFormat.ARGB32;
+#endif
 			}
 		}
 	}
