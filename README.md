@@ -13,8 +13,9 @@ http://qiita.com/kyubuns/items/b4c0c92e60754a8dc544
 
 ### Unity
 
-* Baum2/Unity/Assets/Baum2ディレクトリを自身のUnityプロジェクト下にコピーしてください。
-* Baum2/Unity/Assets/Sample以下を参考に、好きなディレクトリに「BaumSprites」「BaumPrefabs」「BaumFonts」という空のファイルを作ってください。
+* baum2.unitypackageを展開してください。
+    * 展開後、Baum2ディレクトリはどこに移動させても構いません。
+* Baum2/Sample以下を参考に、好きなディレクトリに「BaumSprites」「BaumPrefabs」「BaumFonts」という空のファイルを作ってください。
     * BaumSprites: psdから生成されたSpriteを保存するディレクトリになります。
     * BaumPrefabs: psdから生成されたPrefabを保存するディレクトリになります。
     * BaumFonts: Prefabを作る際に使用するFontの参照先になります。
