@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
+using System.Linq;
 
 namespace Baum2.Editor
 {
@@ -32,7 +33,16 @@ namespace Baum2.Editor
 
 		public static string GetPath(string fileName)
 		{
-			string path = Directory.GetFiles(Application.dataPath, fileName, SearchOption.AllDirectories)[0];
+			var files = Directory.GetFiles(Application.dataPath, fileName, SearchOption.AllDirectories);
+			if (files.Length > 1)
+			{
+				files = files.Where(x => !x.Contains("Baum2/Sample")).ToArray();
+			}
+			if (files.Length > 1)
+			{
+				Debug.LogErrorFormat("{0}ファイルがプロジェクト内に複数個存在します。", fileName);
+			}
+			string path = files[0];
 			return path.Substring(0, path.Length - fileName.Length);
 		}
 
