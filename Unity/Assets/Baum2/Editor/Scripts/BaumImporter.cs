@@ -19,7 +19,7 @@ namespace Baum2.Editor
 			{
 				if (!asset.Contains(EditorUtil.ImportDirectoryPath)) continue;
 				if (!string.IsNullOrEmpty(Path.GetExtension(asset))) continue;
-				CreateSpritesDirectory(asset);
+				CreateSpritesDirectory(asset, importedAssets);
 				changed = true;
 			}
 
@@ -69,18 +69,21 @@ namespace Baum2.Editor
 			};
 		}
 
-		private static void CreateSpritesDirectory(string asset)
+		private static void CreateSpritesDirectory(string asset, string[] importedAssets)
 		{
 			var directoryName = Path.GetFileName(Path.GetFileName(asset));
 			var directoryPath = EditorUtil.GetBaumSpritesPath();
 			var directoryFullPath = Path.Combine(directoryPath, directoryName);
 			if (Directory.Exists(directoryFullPath))
 			{
-				AssetDatabase.DeleteAsset(EditorUtil.ToUnityPath(directoryFullPath));
-				Debug.LogFormat("[Baum2] Delete Directory: {0}", EditorUtil.ToUnityPath(directoryFullPath));
+				Debug.LogFormat("[Baum2] Delete Exist Sprites: {0}", EditorUtil.ToUnityPath(directoryFullPath));
+				foreach (var filePath in Directory.GetFiles(directoryFullPath, "*.png", SearchOption.TopDirectoryOnly)) File.Delete(filePath);
 			}
-			Debug.LogFormat("[Baum2] Create Directory: {0}", EditorUtil.ToUnityPath(directoryPath) + "/" + directoryName);
-			AssetDatabase.CreateFolder(EditorUtil.ToUnityPath(directoryPath), Path.GetFileName(directoryFullPath));
+			else
+			{
+				Debug.LogFormat("[Baum2] Create Directory: {0}", EditorUtil.ToUnityPath(directoryPath) + "/" + directoryName);
+				AssetDatabase.CreateFolder(EditorUtil.ToUnityPath(directoryPath), Path.GetFileName(directoryFullPath));
+			}
 		}
 
 		private static void SliceSprite(string asset)
