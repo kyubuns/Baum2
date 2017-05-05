@@ -23,7 +23,7 @@ namespace Baum2.Editor
 			else if (assetPath.Contains(EditorUtil.ToUnityPath(EditorUtil.GetBaumSpritesPath())))
 			{
 				var fileName = Path.GetFileName(assetPath);
-				if (!SlicedTextures.ContainsKey(fileName)) return;
+				if (SlicedTextures == null || !SlicedTextures.ContainsKey(fileName)) return;
 				var importer = assetImporter as TextureImporter;
 				importer.textureType = TextureImporterType.Sprite;
 				importer.spriteImportMode = SpriteImportMode.Single;
