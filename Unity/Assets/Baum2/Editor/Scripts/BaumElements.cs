@@ -8,7 +8,7 @@ namespace Baum2.Editor
 {
 	public abstract class Element
 	{
-		private static Dictionary<string, Func<Dictionary<string, object>, Element>> generator = new Dictionary<string, Func<Dictionary<string, object>, Element>>()
+		public static Dictionary<string, Func<Dictionary<string, object>, Element>> Generator = new Dictionary<string, Func<Dictionary<string, object>, Element>>()
 		{
 			{ "Image", (d) => { return new ImageElement(d); } },
 			{ "Group", (d) => { return new GroupElement(d); } },
@@ -23,8 +23,8 @@ namespace Baum2.Editor
 		public static Element Generate(Dictionary<string, object> json)
 		{
 			var type = json.Get("type");
-			Assert.IsTrue(generator.ContainsKey(type), "[Baum2] Unknown type: " + type);
-			return generator[type](json);
+			Assert.IsTrue(Generator.ContainsKey(type), "[Baum2] Unknown type: " + type);
+			return Generator[type](json);
 		}
 
 		public abstract GameObject Render(Renderer renderer);
