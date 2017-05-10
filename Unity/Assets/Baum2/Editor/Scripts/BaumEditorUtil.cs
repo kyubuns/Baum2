@@ -11,9 +11,9 @@ namespace Baum2.Editor
 
 		public static string ToUnityPath(string path)
 		{
-			path = path.Substring(path.IndexOf("Assets/", System.StringComparison.Ordinal));
-			if (path.EndsWith("/", System.StringComparison.Ordinal)) return path.Substring(0, path.Length-1);
-			return path;
+			path = path.Substring(path.IndexOf("Assets", System.StringComparison.Ordinal));
+			if (path.EndsWith("/", System.StringComparison.Ordinal) || path.EndsWith("\\", System.StringComparison.Ordinal)) path = path.Substring(0, path.Length - 1);
+			return path.Replace("\\", "/");
 		}
 
 		public static string GetBaumSpritesPath()
