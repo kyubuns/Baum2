@@ -9,7 +9,7 @@
       this.runOneFile = bind(this.runOneFile, this);
     }
 
-    Baum.version = '0.0.5';
+    Baum.version = '0.0.6';
 
     Baum.maxLength = 1334;
 
@@ -241,7 +241,7 @@
           }
         },
         root: {
-          type: 'Group',
+          type: 'Root',
           name: documentName,
           elements: layers
         }

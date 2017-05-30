@@ -1,7 +1,7 @@
 `#include "lib/json2.min.js"`
 
 class Baum
-  @version = '0.0.5'
+  @version = '0.0.6'
   @maxLength = 1334
 
   run: ->
@@ -172,7 +172,7 @@ class PsdToJson
         }
       }
       root: {
-        type: 'Group'
+        type: 'Root'
         name: documentName
         elements: layers
       }

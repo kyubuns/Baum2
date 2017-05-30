@@ -10,6 +10,7 @@ namespace Baum2.Editor
 	{
 		public static Dictionary<string, Func<Dictionary<string, object>, Element>> Generator = new Dictionary<string, Func<Dictionary<string, object>, Element>>()
 		{
+			{ "Root", (d) => { return new RootElement(d); } },
 			{ "Image", (d) => { return new ImageElement(d); } },
 			{ "Group", (d) => { return new GroupElement(d); } },
 			{ "Text", (d) => { return new TextElement(d); } },
@@ -59,7 +60,7 @@ namespace Baum2.Editor
 			return go;
 		}
 
-		protected GameObject CreateSelf(Renderer renderer)
+		protected virtual GameObject CreateSelf(Renderer renderer)
 		{
 			var go = PrefabCreator.CreateUIGameObject(Name);
 
@@ -127,6 +128,25 @@ namespace Baum2.Editor
 			return area;
 		}
 	}
+
+    public class RootElement : GroupElement
+    {
+        public RootElement(Dictionary<string, object> json) : base(json)
+        {
+        }
+
+        protected override GameObject CreateSelf(Renderer renderer)
+        {
+            var go = PrefabCreator.CreateUIGameObject(Name);
+
+            var rect = go.GetComponent<RectTransform>();
+            var area = CalcArea();
+            rect.sizeDelta = area.Size;
+            rect.localPosition = Vector2.zero;
+
+            return go;
+        }
+    }
 
 	public sealed class ImageElement : Element
 	{
