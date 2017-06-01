@@ -81,6 +81,8 @@ namespace Baum2.Editor
 
 			elements.Remove(maskSource);
 			var maskImage = go.AddComponent<Image>();
+			maskImage.raycastTarget = false;
+
 			var dummyMaskImage = maskSource.Render(renderer);
 			dummyMaskImage.transform.SetParent(go.transform);
 			dummyMaskImage.GetComponent<Image>().CopyTo(maskImage);
@@ -307,7 +309,6 @@ namespace Baum2.Editor
 		public override GameObject Render(Renderer renderer)
 		{
 			var go = CreateSelf(renderer);
-			SetMaskImage(renderer, go);
 
 			Graphic lastImage = null;
 			RenderChildren(renderer, go, (g, element) =>

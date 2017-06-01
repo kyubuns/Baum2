@@ -1,7 +1,7 @@
 `#include "lib/json2.min.js"`
 
 class Baum
-  @version = '0.0.7'
+  @version = '0.1.0'
   @maxLength = 1334
 
   run: ->
