@@ -25,7 +25,7 @@ namespace OnionRing
 			this.pixels = new int[getPixels.Length];
 			for (int i = 0; i < getPixels.Length; ++i) this.pixels[i] = getPixels[i].a > 0 ? getPixels[i].GetHashCode() : 0;
 		}
-		
+
 		private void CalcLine(ulong[] list, out int start, out int end)
 		{
 			start = 0;
@@ -33,15 +33,15 @@ namespace OnionRing
 			int tmpStart = 0;
 			int tmpEnd = 0;
 			ulong tmpHash = list[0];
-			for(int i=0; i<list.Length; ++i)
+			for (int i = 0; i < list.Length; ++i)
 			{
-				if(tmpHash == list[i])
+				if (tmpHash == list[i])
 				{
 					tmpEnd = i;
 				}
 				else
 				{
-					if(end - start < tmpEnd - tmpStart)
+					if (end - start < tmpEnd - tmpStart)
 					{
 						start = tmpStart;
 						end = tmpEnd;
@@ -51,14 +51,14 @@ namespace OnionRing
 					tmpHash = list[i];
 				}
 			}
-			if(end - start < tmpEnd - tmpStart)
+			if (end - start < tmpEnd - tmpStart)
 			{
 				start = tmpStart;
 				end = tmpEnd;
 			}
-			
-			end -= (safetyMargin*2 + margin);
-			if(end < start)
+
+			end -= (safetyMargin * 2 + margin);
+			if (end < start)
 			{
 				start = 0;
 				end = 0;
@@ -88,7 +88,7 @@ namespace OnionRing
 			}
 			return hashList;
 		}
-		
+
 		private SlicedTexture Slice(Color[] originalPixels)
 		{
 			int xStart, xEnd;
@@ -96,23 +96,23 @@ namespace OnionRing
 				var hashList = CreateHashListX(width, height);
 				CalcLine(hashList, out xStart, out xEnd);
 			}
-			
+
 			int yStart, yEnd;
 			{
 				var hashList = CreateHashListY(height, width);
 				CalcLine(hashList, out yStart, out yEnd);
 			}
-			
+
 			bool skipX = false;
-			if(xEnd - xStart < 2)
+			if (xEnd - xStart < 2)
 			{
 				skipX = true;
 				xStart = 0;
 				xEnd = 0;
 			}
-			
+
 			bool skipY = false;
-			if(yEnd - yStart < 2)
+			if (yEnd - yStart < 2)
 			{
 				skipY = true;
 				yStart = 0;
@@ -121,32 +121,32 @@ namespace OnionRing
 			var output = GenerateSlicedTexture(xStart, xEnd, yStart, yEnd, originalPixels);
 			int left = xStart + safetyMargin;
 			int bottom = yStart + safetyMargin;
-			int right = width-xEnd - safetyMargin - margin;
-			int top = height-yEnd - safetyMargin - margin;
-			if(skipX)
+			int right = width - xEnd - safetyMargin - margin;
+			int top = height - yEnd - safetyMargin - margin;
+			if (skipX)
 			{
 				left = 0;
 				right = 0;
 			}
-			if(skipY)
+			if (skipY)
 			{
 				top = 0;
 				bottom = 0;
 			}
 			return new SlicedTexture(output, new Boarder(left, bottom, right, top));
 		}
-		
+
 		private Texture2D GenerateSlicedTexture(int xStart, int xEnd, int yStart, int yEnd, Color[] originalPixels)
 		{
 			var outputWidth = width - (xEnd - xStart);
 			var outputHeight = height - (yEnd - yStart);
 			var outputPixels = new Color[outputWidth * outputHeight];
-			for(int x=0, originalX=0; x<outputWidth; ++x, ++originalX)
+			for (int x = 0, originalX = 0; x < outputWidth; ++x, ++originalX)
 			{
-				if(originalX == xStart) originalX += (xEnd - xStart);
-				for(int y=0, originalY=0; y<outputHeight; ++y, ++originalY)
+				if (originalX == xStart) originalX += (xEnd - xStart);
+				for (int y = 0, originalY = 0; y < outputHeight; ++y, ++originalY)
 				{
-					if(originalY == yStart) originalY += (yEnd - yStart);
+					if (originalY == yStart) originalY += (yEnd - yStart);
 					outputPixels[y * outputWidth + x] = originalPixels[originalY * width + originalX];
 				}
 			}
@@ -154,13 +154,13 @@ namespace OnionRing
 			output.SetPixels(outputPixels);
 			return output;
 		}
-		
+
 		private int Get(int x, int y)
 		{
 			return pixels[y * width + x];
 		}
 	}
-	
+
 	public class SlicedTexture
 	{
 		public SlicedTexture(Texture2D texture, Boarder boarder)
@@ -168,11 +168,11 @@ namespace OnionRing
 			Texture = texture;
 			Boarder = boarder;
 		}
-		
+
 		public Texture2D Texture { get; private set; }
 		public Boarder Boarder { get; private set; }
 	}
-	
+
 	public class Boarder
 	{
 		public Boarder(int left, int bottom, int right, int top)
@@ -182,9 +182,9 @@ namespace OnionRing
 			Right = right;
 			Top = top;
 		}
-		
+
 		public Vector4 ToVector4() { return new Vector4(Left, Bottom, Right, Top); }
-		
+
 		public int Left { get; private set; }
 		public int Bottom { get; private set; }
 		public int Right { get; private set; }

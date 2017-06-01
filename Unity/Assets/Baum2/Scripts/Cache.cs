@@ -7,7 +7,8 @@ namespace Baum2
 {
 	public class Cache : MonoBehaviour
 	{
-		[SerializeField] public List<CachedGameObject> List = new List<CachedGameObject>();
+		[SerializeField]
+		public List<CachedGameObject> List = new List<CachedGameObject>();
 		private static readonly char[] split = { '/' };
 
 		[Serializable]

@@ -7,7 +7,8 @@ namespace Baum2
 {
 	public class List : MonoBehaviour
 	{
-		[SerializeField] private GameObject itemSource;
+		[SerializeField]
+		private GameObject itemSource;
 		public GameObject ItemSource { private get { return itemSource; } set { itemSource = value; } }
 
 		private GameObject contentCache;
@@ -69,7 +70,7 @@ namespace Baum2
 		private RectTransform cachedRectTransform;
 		private Action<UIRoot, int> itemFactory;
 		private List<UIRoot> items;
-		
+
 		private UIRoot AddItem()
 		{
 			var item = Instantiate(ItemSource);
@@ -87,12 +88,12 @@ namespace Baum2
 
 			return uiRoot;
 		}
-		
+
 		public void Init(int size, Action<UIRoot, int> factory)
 		{
 			items = new List<UIRoot>();
 			itemFactory = factory;
-			for(int i=0;i<size;++i)
+			for (int i = 0; i < size; ++i)
 			{
 				var item = AddItem();
 				itemFactory(item, i);
@@ -122,14 +123,14 @@ namespace Baum2
 				itemFactory(items[i], i);
 			}
 		}
-		
+
 		public void LateUpdate()
 		{
-			if(!updateSize) return;
+			if (!updateSize) return;
 			updateSize = false;
-			
+
 			// サイズ調整
-			if(cachedRectTransform == null) cachedRectTransform = Content.GetComponent<RectTransform>();
+			if (cachedRectTransform == null) cachedRectTransform = Content.GetComponent<RectTransform>();
 
 			var axis = 1;
 			if (LayoutGroup is VerticalLayoutGroup) { axis = 1; }

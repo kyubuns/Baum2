@@ -149,25 +149,25 @@ namespace Baum2.Editor
 		}
 	}
 
-    public class RootElement : GroupElement
-    {
-        public RootElement(Dictionary<string, object> json) : base(json)
-        {
-        }
+	public class RootElement : GroupElement
+	{
+		public RootElement(Dictionary<string, object> json) : base(json)
+		{
+		}
 
-        protected override GameObject CreateSelf(Renderer renderer)
-        {
-            var go = PrefabCreator.CreateUIGameObject(Name);
+		protected override GameObject CreateSelf(Renderer renderer)
+		{
+			var go = PrefabCreator.CreateUIGameObject(Name);
 
-            var rect = go.GetComponent<RectTransform>();
-            var area = CalcArea();
-            rect.sizeDelta = area.Size;
-            rect.localPosition = Vector2.zero;
+			var rect = go.GetComponent<RectTransform>();
+			var area = CalcArea();
+			rect.sizeDelta = area.Size;
+			rect.localPosition = Vector2.zero;
 
 			SetMaskImage(renderer, go);
-            return go;
-        }
-    }
+			return go;
+		}
+	}
 
 	public class ImageElement : Element
 	{
@@ -273,12 +273,12 @@ namespace Baum2.Editor
 					rect.pivot = new Vector2(0.0f, 0.5f);
 					fixedPos.x -= sizeDelta.x / 2.0f;
 					break;
-					
+
 				case "center":
 					text.alignment = TextAnchor.MiddleCenter;
 					rect.pivot = new Vector2(0.5f, 0.5f);
 					break;
-					
+
 				case "right":
 					text.alignment = TextAnchor.MiddleRight;
 					rect.pivot = new Vector2(1.0f, 0.5f);
