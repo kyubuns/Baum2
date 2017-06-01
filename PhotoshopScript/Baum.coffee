@@ -1,7 +1,7 @@
 `#include "lib/json2.min.js"`
 
 class Baum
-  @version = '0.0.6'
+  @version = '0.0.7'
   @maxLength = 1334
 
   run: ->
@@ -30,6 +30,7 @@ class Baum
     @selectDocumentArea(copiedDoc)
     @ungroupArtboard(copiedDoc)
     @clipping(copiedDoc, copiedDoc)
+    @layerMaskToLayer(copiedDoc, copiedDoc)
     copiedDoc.selection.deselect()
     @psdToJson(copiedDoc)
     @psdToImage(copiedDoc)
@@ -127,6 +128,31 @@ class Baum
     for i in [0...layers.length]
       layers[i].moveBefore(root)
     root.remove()
+
+
+  layerMaskToLayer: (document, root) ->
+    for layer in root.layers
+      continue if layer.typename != 'LayerSet'
+      if Util.hasLayerMask(document, layer)
+        # 新しいレイヤーを作る
+        newLayer = document.artLayers.add()
+        newLayer.name = "#{layer.name}_LayerMask@Mask"
+        newLayer.move(layer, ElementPlacement.PLACEATBEGINNING)
+
+        # レイヤー範囲を選択
+        document.selection.deselect()
+        Util.selectLayerMask(document, layer)
+
+        # 黒で塗りつぶし
+        document.activeLayer = newLayer
+        black = new SolidColor()
+        black.rgb.red = 0
+        black.rgb.green = 0
+        black.rgb.blue = 0
+        document.selection.fill(black)
+
+        Util.deleteLayerMask(document, layer)
+      @layerMaskToLayer(document, layer)
 
 
   psdToJson: (targetDocument) ->
@@ -251,6 +277,16 @@ class PsdToJson
         vh: vh
         opacity: Math.round(layer.opacity * 10.0)/10.0
         angle: Math.round(angle * 100.0)/100.0
+      }
+    else if opt['mask']
+      hash = {
+        type: 'Mask'
+        image: Util.layerToImageName(layer)
+        x: layer.bounds[0].value
+        y: layer.bounds[1].value
+        w: layer.bounds[2].value - layer.bounds[0].value
+        h: layer.bounds[3].value - layer.bounds[1].value
+        opacity: Math.round(layer.opacity * 10.0)/10.0
       }
     else
       hash = {
@@ -395,6 +431,78 @@ class Util
 
   @revertToSnapshot: (doc, snapshotID) ->
     doc.activeHistoryState = doc.historyStates[snapshotID]
+
+  @hasLayerMask: (doc, layer) ->
+    doc.activeLayer = layer
+
+    hasLayerMask = false
+    try
+      ref = new ActionReference()
+      keyUserMaskEnabled = charIDToTypeID("UsrM")
+      ref.putProperty(charIDToTypeID("Prpr"), keyUserMaskEnabled)
+      ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"))
+      desc = executeActionGet(ref)
+      hasLayerMask = desc.hasKey(keyUserMaskEnabled)
+    catch e
+      hasLayerMask = false
+
+    hasLayerMask
+
+  @selectLayerMask: (doc, layer) ->
+    doc.activeLayer = layer
+
+    try
+      # Select Layer Mask
+      id759 = charIDToTypeID( "slct" )
+      desc153 = new ActionDescriptor()
+      id760 = charIDToTypeID( "null" )
+      ref92 = new ActionReference()
+      id761 = charIDToTypeID( "Chnl" )
+      id762 = charIDToTypeID( "Chnl" )
+      id763 = charIDToTypeID( "Msk " )
+      ref92.putEnumerated( id761, id762, id763 )
+      desc153.putReference( id760, ref92 )
+      id764 = charIDToTypeID( "MkVs" )
+      desc153.putBoolean( id764, false )
+      executeAction( id759, desc153, DialogModes.NO )
+
+      # Add Mask To Selection
+      idsetd = charIDToTypeID( "setd" )
+      desc299 = new ActionDescriptor()
+      idnull = charIDToTypeID( "null" )
+      ref117 = new ActionReference()
+      idChnl = charIDToTypeID( "Chnl" )
+      idfsel = charIDToTypeID( "fsel" )
+      ref117.putProperty( idChnl, idfsel )
+      desc299.putReference( idnull, ref117 )
+      idT = charIDToTypeID( "T   " )
+      ref118 = new ActionReference()
+      idChnl = charIDToTypeID( "Chnl" )
+      idOrdn = charIDToTypeID( "Ordn" )
+      idTrgt = charIDToTypeID( "Trgt" )
+      ref118.putEnumerated( idChnl, idOrdn, idTrgt )
+      desc299.putReference( idT, ref118 )
+      executeAction( idsetd, desc299, DialogModes.NO )
+
+    catch e
+      alert(e)
+
+
+  @deleteLayerMask: (doc, layer) ->
+    doc.activeLayer = layer
+
+    try
+      idDlt = charIDToTypeID("Dlt ")
+      desc6 = new ActionDescriptor()
+      idnull = charIDToTypeID("null")
+      ref5 = new ActionReference()
+      idChnl = charIDToTypeID("Chnl")
+      idOrdn = charIDToTypeID("Ordn")
+      idTrgt = charIDToTypeID("Trgt")
+      ref5.putEnumerated(idChnl, idOrdn, idTrgt)
+      desc6.putReference(idnull, ref5)
+      executeAction(idDlt, desc6, DialogModes.NO)
+    catch e
 
 String.prototype.startsWith = (str) ->
   return this.slice(0, str.length) == str

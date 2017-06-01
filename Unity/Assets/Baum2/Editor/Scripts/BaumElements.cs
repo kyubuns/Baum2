@@ -12,6 +12,7 @@ namespace Baum2.Editor
 		{
 			{ "Root", (d) => { return new RootElement(d); } },
 			{ "Image", (d) => { return new ImageElement(d); } },
+			{ "Mask", (d) => { return new MaskElement(d); } },
 			{ "Group", (d) => { return new GroupElement(d); } },
 			{ "Text", (d) => { return new TextElement(d); } },
 			{ "Button", (d) => { return new ButtonElement(d); } },
@@ -69,7 +70,24 @@ namespace Baum2.Editor
 			rect.sizeDelta = area.Size;
 			rect.localPosition = renderer.CalcPosition(area.Min, area.Size);
 
+			SetMaskImage(renderer, go);
 			return go;
+		}
+
+		protected void SetMaskImage(Renderer renderer, GameObject go)
+		{
+			var maskSource = elements.Find(x => x is MaskElement);
+			if (maskSource == null) return;
+
+			elements.Remove(maskSource);
+			var maskImage = go.AddComponent<Image>();
+			var dummyMaskImage = maskSource.Render(renderer);
+			dummyMaskImage.transform.SetParent(go.transform);
+			dummyMaskImage.GetComponent<Image>().CopyTo(maskImage);
+			GameObject.DestroyImmediate(dummyMaskImage);
+
+			var mask = go.AddComponent<Mask>();
+			mask.showMaskGraphic = false;
 		}
 
 		protected void RenderChildren(Renderer renderer, GameObject root, Action<GameObject, Element> callback = null)
@@ -144,11 +162,12 @@ namespace Baum2.Editor
             rect.sizeDelta = area.Size;
             rect.localPosition = Vector2.zero;
 
+			SetMaskImage(renderer, go);
             return go;
         }
     }
 
-	public sealed class ImageElement : Element
+	public class ImageElement : Element
 	{
 		private string spriteName;
 		private Vector2 canvasPosition;
@@ -194,6 +213,13 @@ namespace Baum2.Editor
 		public override Area CalcArea()
 		{
 			return Area.FromPositionAndSize(canvasPosition, sizeDelta);
+		}
+	}
+
+	public sealed class MaskElement : ImageElement
+	{
+		public MaskElement(Dictionary<string, object> json) : base(json)
+		{
 		}
 	}
 
@@ -281,6 +307,7 @@ namespace Baum2.Editor
 		public override GameObject Render(Renderer renderer)
 		{
 			var go = CreateSelf(renderer);
+			SetMaskImage(renderer, go);
 
 			Graphic lastImage = null;
 			RenderChildren(renderer, go, (g, element) =>
@@ -364,8 +391,8 @@ namespace Baum2.Editor
 
 		private GameObject CreateDummyMaskImage(Renderer renderer)
 		{
-			var maskElement = elements.Find(x => (x is ImageElement && x.Name == "Mask"));
-			if (maskElement == null) throw new Exception(string.Format("{0} Mask not found", Name));
+			var maskElement = elements.Find(x => (x is ImageElement && x.Name == "Area"));
+			if (maskElement == null) throw new Exception(string.Format("{0} Area not found", Name));
 			elements.Remove(maskElement);
 
 			var maskImage = maskElement.Render(renderer);

@@ -10,7 +10,7 @@ namespace Baum2.Editor
 {
 	public class PrefabCreator
 	{
-		private static readonly string[] versions = { "0.0.6" };
+		private static readonly string[] versions = { "0.0.7" };
 		private string spriteRootPath;
 		private string fontRootPath;
 		private string assetPath;

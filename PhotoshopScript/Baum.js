@@ -9,7 +9,7 @@
       this.runOneFile = bind(this.runOneFile, this);
     }
 
-    Baum.version = '0.0.6';
+    Baum.version = '0.0.7';
 
     Baum.maxLength = 1334;
 
@@ -44,6 +44,7 @@
       this.selectDocumentArea(copiedDoc);
       this.ungroupArtboard(copiedDoc);
       this.clipping(copiedDoc, copiedDoc);
+      this.layerMaskToLayer(copiedDoc, copiedDoc);
       copiedDoc.selection.deselect();
       this.psdToJson(copiedDoc);
       this.psdToImage(copiedDoc);
@@ -188,6 +189,34 @@
         layers[i].moveBefore(root);
       }
       return root.remove();
+    };
+
+    Baum.prototype.layerMaskToLayer = function(document, root) {
+      var black, j, layer, len, newLayer, ref1, results;
+      ref1 = root.layers;
+      results = [];
+      for (j = 0, len = ref1.length; j < len; j++) {
+        layer = ref1[j];
+        if (layer.typename !== 'LayerSet') {
+          continue;
+        }
+        if (Util.hasLayerMask(document, layer)) {
+          newLayer = document.artLayers.add();
+          newLayer.name = layer.name + "_LayerMask@Mask";
+          newLayer.move(layer, ElementPlacement.PLACEATBEGINNING);
+          document.selection.deselect();
+          Util.selectLayerMask(document, layer);
+          document.activeLayer = newLayer;
+          black = new SolidColor();
+          black.rgb.red = 0;
+          black.rgb.green = 0;
+          black.rgb.blue = 0;
+          document.selection.fill(black);
+          Util.deleteLayerMask(document, layer);
+        }
+        results.push(this.layerMaskToLayer(document, layer));
+      }
+      return results;
     };
 
     Baum.prototype.psdToJson = function(targetDocument) {
@@ -345,6 +374,16 @@
           vh: vh,
           opacity: Math.round(layer.opacity * 10.0) / 10.0,
           angle: Math.round(angle * 100.0) / 100.0
+        };
+      } else if (opt['mask']) {
+        hash = {
+          type: 'Mask',
+          image: Util.layerToImageName(layer),
+          x: layer.bounds[0].value,
+          y: layer.bounds[1].value,
+          w: layer.bounds[2].value - layer.bounds[0].value,
+          h: layer.bounds[3].value - layer.bounds[1].value,
+          opacity: Math.round(layer.opacity * 10.0) / 10.0
         };
       } else {
         hash = {
@@ -574,6 +613,81 @@
 
     Util.revertToSnapshot = function(doc, snapshotID) {
       return doc.activeHistoryState = doc.historyStates[snapshotID];
+    };
+
+    Util.hasLayerMask = function(doc, layer) {
+      var desc, e, hasLayerMask, keyUserMaskEnabled, ref;
+      doc.activeLayer = layer;
+      hasLayerMask = false;
+      try {
+        ref = new ActionReference();
+        keyUserMaskEnabled = charIDToTypeID("UsrM");
+        ref.putProperty(charIDToTypeID("Prpr"), keyUserMaskEnabled);
+        ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+        desc = executeActionGet(ref);
+        hasLayerMask = desc.hasKey(keyUserMaskEnabled);
+      } catch (error) {
+        e = error;
+        hasLayerMask = false;
+      }
+      return hasLayerMask;
+    };
+
+    Util.selectLayerMask = function(doc, layer) {
+      var desc153, desc299, e, id759, id760, id761, id762, id763, id764, idChnl, idOrdn, idT, idTrgt, idfsel, idnull, idsetd, ref117, ref118, ref92;
+      doc.activeLayer = layer;
+      try {
+        id759 = charIDToTypeID("slct");
+        desc153 = new ActionDescriptor();
+        id760 = charIDToTypeID("null");
+        ref92 = new ActionReference();
+        id761 = charIDToTypeID("Chnl");
+        id762 = charIDToTypeID("Chnl");
+        id763 = charIDToTypeID("Msk ");
+        ref92.putEnumerated(id761, id762, id763);
+        desc153.putReference(id760, ref92);
+        id764 = charIDToTypeID("MkVs");
+        desc153.putBoolean(id764, false);
+        executeAction(id759, desc153, DialogModes.NO);
+        idsetd = charIDToTypeID("setd");
+        desc299 = new ActionDescriptor();
+        idnull = charIDToTypeID("null");
+        ref117 = new ActionReference();
+        idChnl = charIDToTypeID("Chnl");
+        idfsel = charIDToTypeID("fsel");
+        ref117.putProperty(idChnl, idfsel);
+        desc299.putReference(idnull, ref117);
+        idT = charIDToTypeID("T   ");
+        ref118 = new ActionReference();
+        idChnl = charIDToTypeID("Chnl");
+        idOrdn = charIDToTypeID("Ordn");
+        idTrgt = charIDToTypeID("Trgt");
+        ref118.putEnumerated(idChnl, idOrdn, idTrgt);
+        desc299.putReference(idT, ref118);
+        return executeAction(idsetd, desc299, DialogModes.NO);
+      } catch (error) {
+        e = error;
+        return alert(e);
+      }
+    };
+
+    Util.deleteLayerMask = function(doc, layer) {
+      var desc6, e, idChnl, idDlt, idOrdn, idTrgt, idnull, ref5;
+      doc.activeLayer = layer;
+      try {
+        idDlt = charIDToTypeID("Dlt ");
+        desc6 = new ActionDescriptor();
+        idnull = charIDToTypeID("null");
+        ref5 = new ActionReference();
+        idChnl = charIDToTypeID("Chnl");
+        idOrdn = charIDToTypeID("Ordn");
+        idTrgt = charIDToTypeID("Trgt");
+        ref5.putEnumerated(idChnl, idOrdn, idTrgt);
+        desc6.putReference(idnull, ref5);
+        return executeAction(idDlt, desc6, DialogModes.NO);
+      } catch (error) {
+        e = error;
+      }
     };
 
     return Util;
