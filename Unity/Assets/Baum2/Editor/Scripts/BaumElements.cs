@@ -386,8 +386,8 @@ namespace Baum2.Editor
 			dummyMaskImage.GetComponent<Image>().CopyTo(maskImage);
 			GameObject.DestroyImmediate(dummyMaskImage);
 
-			var mask = go.AddComponent<Mask>();
-			mask.showMaskGraphic = false;
+			maskImage.color = new Color(0.0f, 0.0f, 0.0f, 0.0f);
+			go.AddComponent<RectMask2D>();
 		}
 
 		private GameObject CreateDummyMaskImage(Renderer renderer)
