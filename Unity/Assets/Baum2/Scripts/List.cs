@@ -82,7 +82,7 @@ namespace Baum2
 		private UIRoot AddItem(string sourceName)
 		{
 			var item = Instantiate(ItemSources.Find(x => x.name == sourceName));
-			item.transform.SetParent(GetComponent<ScrollRect>().content.transform);
+			item.transform.SetParent(Content.transform);
 			item.transform.localScale = Vector3.one;
 			item.SetActive(true);
 			updateSize = true;
@@ -141,10 +141,17 @@ namespace Baum2
 
 			// サイズ調整
 			var axis = 1;
-			if (LayoutGroup is VerticalLayoutGroup) { axis = 1; }
-			else if (LayoutGroup is HorizontalLayoutGroup) { axis = 0; }
+			if (LayoutGroup is VerticalLayoutGroup)
+			{
+				axis = 1;
+			}
+			else if (LayoutGroup is HorizontalLayoutGroup)
+			{
+				axis = 0;
+			}
 
 			var scrollSize = ContentRectTransform.sizeDelta;
+			LayoutRebuilder.ForceRebuildLayoutImmediate(ContentRectTransform);
 			scrollSize[axis] = LayoutUtility.GetPreferredSize(ContentRectTransform, axis);
 			ContentRectTransform.sizeDelta = scrollSize;
 
