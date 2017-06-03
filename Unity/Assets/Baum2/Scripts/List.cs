@@ -109,16 +109,13 @@ namespace Baum2
 			}
 		}
 
-		public void Add()
-		{
-			var index = items.Count;
-			var item = AddItem(uiSelector(index));
-			uiFactory(item, index);
-		}
-
 		public void Resize(int size)
 		{
-			throw new NotImplementedException();
+			foreach (Transform item in Content.transform)
+			{
+				Destroy(item.gameObject);
+			}
+			Init(size, uiSelector, uiFactory);
 		}
 
 		public void UpdateItem(int index)

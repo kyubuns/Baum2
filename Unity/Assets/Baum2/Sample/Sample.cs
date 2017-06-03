@@ -8,11 +8,14 @@ namespace Baum2.Sample
 	{
 		[SerializeField]
 		private GameObject UIPrefab;
+
 		private UIRoot UI;
+		private int ListSize;
 
 		public void Start()
 		{
 			UI = BaumUI.Instantiate(gameObject, UIPrefab);
+			ListSize = 5;
 			ImageSample();
 			ButtonSample();
 			ListSample();
@@ -39,7 +42,7 @@ namespace Baum2.Sample
 				welcomeText.text = "Welcome to Hoge!";
 				UI.Get("Image1").SetActive(true);
 				UI.Get("Image2").SetActive(false);
-				list.Add();
+				list.Resize(++ListSize);
 			});
 
 			UI.Get<Button>("FugaButton").onClick.AddListener(() =>
@@ -47,7 +50,7 @@ namespace Baum2.Sample
 				welcomeText.text = "Welcome to Fuga!";
 				UI.Get("Image1").SetActive(false);
 				UI.Get("Image2").SetActive(true);
-				list.Add();
+				list.Resize(--ListSize);
 			});
 		}
 
@@ -55,7 +58,7 @@ namespace Baum2.Sample
 		{
 			var list = UI.Get<List>("PiyoList");
 			list.Spacing = 10;
-			list.Init(10,
+			list.Init(ListSize,
 				(int index) =>
 				{
 					return index % 2 == 0 ? "Item1" : "Item2";
