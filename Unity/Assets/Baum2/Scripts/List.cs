@@ -10,6 +10,8 @@ namespace Baum2
 		[SerializeField]
 		public List<GameObject> ItemSources;
 
+		public Action OnSizeChanged;
+
 		private GameObject contentCache;
 		public GameObject Content
 		{
@@ -27,6 +29,16 @@ namespace Baum2
 			{
 				if (contentRectTransformCache == null) contentRectTransformCache = Content.GetComponent<RectTransform>();
 				return contentRectTransformCache;
+			}
+		}
+
+		private RectTransform rectTransformCache;
+		public RectTransform RectTransform
+		{
+			get
+			{
+				if (rectTransformCache == null) rectTransformCache = GetComponent<RectTransform>();
+				return rectTransformCache;
 			}
 		}
 
@@ -149,7 +161,7 @@ namespace Baum2
 
 			var scrollSize = ContentRectTransform.sizeDelta;
 			LayoutRebuilder.ForceRebuildLayoutImmediate(ContentRectTransform);
-			scrollSize[axis] = LayoutUtility.GetPreferredSize(ContentRectTransform, axis);
+			scrollSize[axis] = Mathf.Max(LayoutUtility.GetPreferredSize(ContentRectTransform, axis), RectTransform.sizeDelta[axis]);
 			ContentRectTransform.sizeDelta = scrollSize;
 
 			if (LayoutGroup is VerticalLayoutGroup)
@@ -162,6 +174,8 @@ namespace Baum2
 				ScrollRect.horizontalNormalizedPosition = 0.0f;
 				ScrollRect.verticalNormalizedPosition = 1.0f;
 			}
+
+			if (OnSizeChanged != null) OnSizeChanged();
 		}
 	}
 }
