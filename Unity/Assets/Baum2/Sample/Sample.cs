@@ -34,10 +34,16 @@ namespace Baum2.Sample
 
 			var list = UI.Get<List>("PiyoList");
 			list.Spacing = 10;
-			list.Init(10, (UIRoot ui, int index) =>
-			{
-				ui.Get<Text>("ListItemText").text = string.Format("Piyo: {0}", index);
-			});
+			list.Init(10,
+				(int index) =>
+				{
+					return index % 2 == 0 ? "Item1" : "Item2";
+				},
+				(UIRoot ui, int index) =>
+				{
+					ui.Get<Text>("ListItemText").text = string.Format("Piyo: {0}", index);
+				}
+			);
 		}
 
 		public void Update()

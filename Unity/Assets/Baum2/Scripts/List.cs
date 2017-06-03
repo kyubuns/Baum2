@@ -8,8 +8,7 @@ namespace Baum2
 	public class List : MonoBehaviour
 	{
 		[SerializeField]
-		private GameObject itemSource;
-		public GameObject ItemSource { private get { return itemSource; } set { itemSource = value; } }
+		public List<GameObject> ItemSources;
 
 		private GameObject contentCache;
 		public GameObject Content
@@ -21,6 +20,15 @@ namespace Baum2
 			}
 		}
 
+		private RectTransform contentRectTransformCache;
+		public RectTransform ContentRectTransform
+		{
+			get
+			{
+				if (contentRectTransformCache == null) contentRectTransformCache = Content.GetComponent<RectTransform>();
+				return contentRectTransformCache;
+			}
+		}
 
 		private ScrollRect scrollRectCache;
 		public ScrollRect ScrollRect
@@ -67,13 +75,13 @@ namespace Baum2
 		}
 
 		private bool updateSize;
-		private RectTransform cachedRectTransform;
-		private Action<UIRoot, int> itemFactory;
+		private Func<int, string> uiSelector;
+		private Action<UIRoot, int> uiFactory;
 		private List<UIRoot> items;
 
-		private UIRoot AddItem()
+		private UIRoot AddItem(string sourceName)
 		{
-			var item = Instantiate(ItemSource);
+			var item = Instantiate(ItemSources.Find(x => x.name == sourceName));
 			item.transform.SetParent(GetComponent<ScrollRect>().content.transform);
 			item.transform.localScale = Vector3.one;
 			item.SetActive(true);
@@ -89,21 +97,23 @@ namespace Baum2
 			return uiRoot;
 		}
 
-		public void Init(int size, Action<UIRoot, int> factory)
+		public void Init(int size, Func<int, string> uiSelector, Action<UIRoot, int> uiFactory)
 		{
 			items = new List<UIRoot>();
-			itemFactory = factory;
+			this.uiSelector = uiSelector;
+			this.uiFactory = uiFactory;
 			for (int i = 0; i < size; ++i)
 			{
-				var item = AddItem();
-				itemFactory(item, i);
+				var item = AddItem(uiSelector(i));
+				uiFactory(item, i);
 			}
 		}
 
 		public void Add()
 		{
-			var item = AddItem();
-			itemFactory(item, items.Count - 1);
+			var index = items.Count;
+			var item = AddItem(uiSelector(index));
+			uiFactory(item, index);
 		}
 
 		public void Resize(int size)
@@ -113,14 +123,14 @@ namespace Baum2
 
 		public void UpdateItem(int index)
 		{
-			itemFactory(items[index], index);
+			uiFactory(items[index], index);
 		}
 
 		public void UpdateAll()
 		{
 			for (int i = 0; i < items.Count; ++i)
 			{
-				itemFactory(items[i], i);
+				uiFactory(items[i], i);
 			}
 		}
 
@@ -130,15 +140,13 @@ namespace Baum2
 			updateSize = false;
 
 			// サイズ調整
-			if (cachedRectTransform == null) cachedRectTransform = Content.GetComponent<RectTransform>();
-
 			var axis = 1;
 			if (LayoutGroup is VerticalLayoutGroup) { axis = 1; }
 			else if (LayoutGroup is HorizontalLayoutGroup) { axis = 0; }
 
-			var scrollSize = cachedRectTransform.sizeDelta;
-			scrollSize[axis] = LayoutUtility.GetPreferredSize(cachedRectTransform, axis);
-			cachedRectTransform.sizeDelta = scrollSize;
+			var scrollSize = ContentRectTransform.sizeDelta;
+			scrollSize[axis] = LayoutUtility.GetPreferredSize(ContentRectTransform, axis);
+			ContentRectTransform.sizeDelta = scrollSize;
 
 			if (LayoutGroup is VerticalLayoutGroup)
 			{

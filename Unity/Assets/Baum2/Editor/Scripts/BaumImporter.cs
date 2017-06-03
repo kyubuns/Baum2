@@ -76,12 +76,12 @@ namespace Baum2.Editor
 			var directoryFullPath = Path.Combine(directoryPath, directoryName);
 			if (Directory.Exists(directoryFullPath))
 			{
-				Debug.LogFormat("[Baum2] Delete Exist Sprites: {0}", EditorUtil.ToUnityPath(directoryFullPath));
+				// Debug.LogFormat("[Baum2] Delete Exist Sprites: {0}", EditorUtil.ToUnityPath(directoryFullPath));
 				foreach (var filePath in Directory.GetFiles(directoryFullPath, "*.png", SearchOption.TopDirectoryOnly)) File.Delete(filePath);
 			}
 			else
 			{
-				Debug.LogFormat("[Baum2] Create Directory: {0}", EditorUtil.ToUnityPath(directoryPath) + "/" + directoryName);
+				// Debug.LogFormat("[Baum2] Create Directory: {0}", EditorUtil.ToUnityPath(directoryPath) + "/" + directoryName);
 				AssetDatabase.CreateFolder(EditorUtil.ToUnityPath(directoryPath), Path.GetFileName(directoryFullPath));
 			}
 		}
@@ -101,7 +101,7 @@ namespace Baum2.Editor
 			File.WriteAllBytes(newPath, pngData);
 			Object.DestroyImmediate(slicedTexture.Texture);
 
-			Debug.LogFormat("[Baum2] Slice: {0} -> {1}", EditorUtil.ToUnityPath(asset), EditorUtil.ToUnityPath(newPath));
+			// Debug.LogFormat("[Baum2] Slice: {0} -> {1}", EditorUtil.ToUnityPath(asset), EditorUtil.ToUnityPath(newPath));
 		}
 	}
 }

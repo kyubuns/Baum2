@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -346,8 +347,8 @@ namespace Baum2.Editor
 			SetupScroll(go, content);
 			SetMaskImage(renderer, go, content);
 
-			var item = CreateItem(renderer, go);
-			SetupList(go, item);
+			var items = CreateItems(renderer, go);
+			SetupList(go, items);
 
 			return go;
 		}
@@ -401,26 +402,31 @@ namespace Baum2.Editor
 			return maskImage;
 		}
 
-		private GameObject CreateItem(Renderer renderer, GameObject go)
+		private List<GameObject> CreateItems(Renderer renderer, GameObject go)
 		{
-			if (elements.Count != 1) throw new Exception(string.Format("{0} List error", Name));
-			var item = elements[0] as GroupElement;
-			if (item == null) throw new Exception(string.Format("{0} List error", Name));
+			var items = new List<GameObject>();
+			foreach (var element in elements)
+			{
+				var item = element as GroupElement;
+				if (item == null) throw new Exception(string.Format("{0}'s element {1} is not group", Name, element.Name));
 
-			var itemObject = item.Render(renderer);
-			var layout = itemObject.AddComponent<LayoutElement>();
-			if (scroll == "Vertical") layout.minHeight = item.CalcArea().Height;
-			else if (scroll == "Horizontal") layout.minWidth = item.CalcArea().Width;
+				var itemObject = item.Render(renderer);
+				var layout = itemObject.AddComponent<LayoutElement>();
+				if (scroll == "Vertical") layout.minHeight = item.CalcArea().Height;
+				else if (scroll == "Horizontal") layout.minWidth = item.CalcArea().Width;
 
-			itemObject.transform.SetParent(go.transform);
-			itemObject.SetActive(false);
-			return itemObject;
+				itemObject.transform.SetParent(go.transform);
+				itemObject.SetActive(false);
+
+				items.Add(itemObject);
+			}
+			return items;
 		}
 
-		private void SetupList(GameObject go, GameObject item)
+		private void SetupList(GameObject go, List<GameObject> itemSources)
 		{
 			var list = go.AddComponent<List>();
-			list.ItemSource = item;
+			list.ItemSources = itemSources;
 		}
 	}
 
