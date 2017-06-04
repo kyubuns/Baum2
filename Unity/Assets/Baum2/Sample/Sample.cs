@@ -59,16 +59,15 @@ namespace Baum2.Sample
 			var list = UI.Get<List>("PiyoList");
 			list.Scrollbar = UI.Get<Scrollbar>("PiyoScrollbar");
 			list.Spacing = 10;
-			list.Init(ListSize,
-				(int index) =>
-				{
-					return index % 2 == 0 ? "Item1" : "Item2";
-				},
-				(UIRoot ui, int index) =>
-				{
-					ui.Get<Text>("ListItemText").text = string.Format("Piyo: {0}", index);
-				}
-			);
+			list.UISelector = (int index) =>
+			{
+				return index % 2 == 0 ? "Item1" : "Item2";
+			};
+			list.UIFactory = (UIRoot ui, int index) =>
+			{
+				ui.Get<Text>("ListItemText").text = string.Format("Piyo: {0}", index);
+			};
+			list.Resize(ListSize);
 		}
 
 		public void SliderSample()

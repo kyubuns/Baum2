@@ -103,10 +103,36 @@ namespace Baum2
 			}
 		}
 
-		private bool updateSize;
 		private Func<int, string> uiSelector;
+		public Func<int, string> UISelector
+		{
+			get
+			{
+				return uiSelector;
+			}
+			set
+			{
+				uiSelector = value;
+				UpdateAll();
+			}
+		}
+
 		private Action<UIRoot, int> uiFactory;
-		private List<UIRoot> items;
+		public Action<UIRoot, int> UIFactory
+		{
+			get
+			{
+				return uiFactory;
+			}
+			set
+			{
+				uiFactory = value;
+				UpdateAll();
+			}
+		}
+
+		private bool updateSize;
+		private List<UIRoot> items = new List<UIRoot>();
 
 		private UIRoot AddItem(string sourceName)
 		{
@@ -126,25 +152,19 @@ namespace Baum2
 			return uiRoot;
 		}
 
-		public void Init(int size, Func<int, string> uiSelector, Action<UIRoot, int> uiFactory)
-		{
-			items = new List<UIRoot>();
-			this.uiSelector = uiSelector;
-			this.uiFactory = uiFactory;
-			for (int i = 0; i < size; ++i)
-			{
-				var item = AddItem(uiSelector(i));
-				uiFactory(item, i);
-			}
-		}
-
 		public void Resize(int size)
 		{
 			foreach (Transform item in Content.transform)
 			{
 				Destroy(item.gameObject);
 			}
-			Init(size, uiSelector, uiFactory);
+			items.Clear();
+
+			for (int i = 0; i < size; ++i)
+			{
+				var item = AddItem(uiSelector(i));
+				uiFactory(item, i);
+			}
 		}
 
 		public void UpdateItem(int index)
