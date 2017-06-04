@@ -340,6 +340,10 @@ class PsdToJson
       hash['scroll'] = opt['scroll'] if opt['scroll']
     else if name.endsWith('Slider')
       hash = { type: 'Slider' }
+      hash['scroll'] = opt['scroll'] if opt['scroll']
+    else if name.endsWith('Scrollbar')
+      hash = { type: 'Scrollbar' }
+      hash['scroll'] = opt['scroll'] if opt['scroll']
     else
       hash = { type: 'Group' }
     hash['pivot'] = opt['pivot'] if opt['pivot']

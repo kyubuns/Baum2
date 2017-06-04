@@ -19,6 +19,7 @@ namespace Baum2.Editor
 			{ "Button", (d) => { return new ButtonElement(d); } },
 			{ "List", (d) => { return new ListElement(d); } },
 			{ "Slider", (d) => { return new SliderElement(d); } },
+			{ "Scrollbar", (d) => { return new ScrollbarElement(d); } },
 		};
 
 		public string Name;
@@ -459,6 +460,45 @@ namespace Baum2.Editor
 				fillRect.sizeDelta = Vector2.zero;
 				fillRect.localScale = Vector3.one;
 				slider.fillRect = fillRect;
+			}
+
+			return go;
+		}
+	}
+
+	public sealed class ScrollbarElement : GroupElement
+	{
+		public ScrollbarElement(Dictionary<string, object> json) : base(json)
+		{
+		}
+
+		public override GameObject Render(Renderer renderer)
+		{
+			var go = CreateSelf(renderer);
+
+			RectTransform handleRect = null;
+			RenderChildren(renderer, go, (g, element) =>
+			{
+				var image = element as ImageElement;
+				if (handleRect != null || image == null) return;
+				if (element.Name == "Handle") handleRect = g.GetComponent<RectTransform>();
+			});
+
+			var scrollbar = go.AddComponent<Scrollbar>();
+			var handleImage = handleRect == null ? null : handleRect.GetComponent<Image>();
+			if (handleImage != null)
+			{
+				handleRect.localPosition = Vector2.zero;
+				handleRect.anchorMin = new Vector2(0.0f, 0.0f);
+				handleRect.anchorMax = new Vector2(1.0f, 0.0f);
+
+				scrollbar.direction = Scrollbar.Direction.BottomToTop;
+				scrollbar.value = 1.0f;
+				scrollbar.targetGraphic = handleImage;
+				scrollbar.handleRect = handleRect;
+
+				handleRect.sizeDelta = Vector2.zero;
+				handleImage.raycastTarget = true;
 			}
 
 			return go;

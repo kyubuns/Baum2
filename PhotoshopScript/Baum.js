@@ -468,6 +468,16 @@
         hash = {
           type: 'Slider'
         };
+        if (opt['scroll']) {
+          hash['scroll'] = opt['scroll'];
+        }
+      } else if (name.endsWith('Scrollbar')) {
+        hash = {
+          type: 'Scrollbar'
+        };
+        if (opt['scroll']) {
+          hash['scroll'] = opt['scroll'];
+        }
       } else {
         hash = {
           type: 'Group'
