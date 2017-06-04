@@ -62,19 +62,36 @@ namespace Baum2
 			}
 		}
 
+		private Scrollbar scrollbar;
+		public Scrollbar Scrollbar
+		{
+			get
+			{
+				return scrollbar;
+			}
+			set
+			{
+				scrollbar = value;
+
+				if (LayoutGroup is HorizontalLayoutGroup) ScrollRect.horizontalScrollbar = scrollbar;
+				else if (LayoutGroup is VerticalLayoutGroup) ScrollRect.verticalScrollbar = scrollbar;
+				else throw new ApplicationException("LayoutGroup not found");
+			}
+		}
+
 		public float Spacing
 		{
 			get
 			{
 				if (LayoutGroup is HorizontalLayoutGroup) return ((HorizontalLayoutGroup)LayoutGroup).spacing;
 				else if (LayoutGroup is VerticalLayoutGroup) return ((VerticalLayoutGroup)LayoutGroup).spacing;
-				else throw new Exception("LayoutGroup not found");
+				else throw new ApplicationException("LayoutGroup not found");
 			}
 			set
 			{
 				if (LayoutGroup is HorizontalLayoutGroup) ((HorizontalLayoutGroup)LayoutGroup).spacing = value;
 				else if (LayoutGroup is VerticalLayoutGroup) ((VerticalLayoutGroup)LayoutGroup).spacing = value;
-				else throw new Exception("LayoutGroup not found");
+				else throw new ApplicationException("LayoutGroup not found");
 			}
 		}
 

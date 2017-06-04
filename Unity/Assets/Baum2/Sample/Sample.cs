@@ -57,6 +57,7 @@ namespace Baum2.Sample
 		public void ListSample()
 		{
 			var list = UI.Get<List>("PiyoList");
+			list.Scrollbar = UI.Get<Scrollbar>("PiyoScrollbar");
 			list.Spacing = 10;
 			list.Init(ListSize,
 				(int index) =>
