@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -131,6 +132,7 @@ namespace Baum2
 			}
 		}
 
+		private int itemSize;
 		private bool updateSize;
 		private List<UIRoot> items = new List<UIRoot>();
 
@@ -154,6 +156,8 @@ namespace Baum2
 
 		public void Resize(int size)
 		{
+			this.itemSize = size;
+
 			foreach (Transform item in Content.transform)
 			{
 				Destroy(item.gameObject);
@@ -197,8 +201,7 @@ namespace Baum2
 			}
 
 			var scrollSize = ContentRectTransform.sizeDelta;
-			LayoutRebuilder.ForceRebuildLayoutImmediate(ContentRectTransform);
-			scrollSize[axis] = Mathf.Max(LayoutUtility.GetPreferredSize(ContentRectTransform, axis), RectTransform.sizeDelta[axis]);
+			scrollSize[axis] = Mathf.Max(CalcContentSize(axis), RectTransform.sizeDelta[axis]);
 			ContentRectTransform.sizeDelta = scrollSize;
 
 			if (LayoutGroup is VerticalLayoutGroup)
@@ -213,6 +216,16 @@ namespace Baum2
 			}
 
 			if (OnSizeChanged != null) OnSizeChanged();
+		}
+
+		private float CalcContentSize(int axis)
+		{
+			var result = Enumerable.Range(0, itemSize)
+				.Select(i => UISelector(i))
+				.Select(s => ItemSources.Find(x => x.name == s))
+				.Sum(x => x.GetComponent<RectTransform>().sizeDelta[axis]);
+			result += Spacing * (itemSize - 1);
+			return result;
 		}
 	}
 }
