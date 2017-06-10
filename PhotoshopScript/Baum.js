@@ -9,7 +9,7 @@
       this.runOneFile = bind(this.runOneFile, this);
     }
 
-    Baum.version = '0.2.0';
+    Baum.version = '0.2.1';
 
     Baum.maxLength = 1334;
 
