@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -8,7 +9,7 @@ using UnityEditor;
 
 namespace Baum2.Editor
 {
-	public class PrefabCreator
+	public sealed class PrefabCreator
 	{
 		private static readonly string[] versions = { "0.1.0", "0.2.0" };
 		private string spriteRootPath;
@@ -37,9 +38,26 @@ namespace Baum2.Editor
 			var rootElement = Element.Generate(json.GetDic("root"));
 			var root = rootElement.Render(renderer);
 			root.AddComponent<UIRoot>();
+
+			Postprocess(root);
+
 			var cache = root.AddComponent<Cache>();
 			cache.CreateCache(root.transform);
+
 			return root;
+		}
+
+		private void Postprocess(GameObject go)
+		{
+			var methods = Assembly
+				.GetExecutingAssembly()
+				.GetTypes()
+				.Where(x => x.IsSubclassOf(typeof(BaumPostprocessor)))
+				.Select(x => x.GetMethod("OnPostprocessPrefab"));
+			foreach (var method in methods)
+			{
+				method.Invoke(null, new object[] { go });
+			}
 		}
 
 		public void Validation(Dictionary<string, object> info)

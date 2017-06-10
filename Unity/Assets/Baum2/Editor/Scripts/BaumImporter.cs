@@ -6,7 +6,7 @@ using OnionRing;
 
 namespace Baum2.Editor
 {
-	public class Importer : AssetPostprocessor
+	public sealed class Importer : AssetPostprocessor
 	{
 		public override int GetPostprocessOrder() { return 1000; }
 
