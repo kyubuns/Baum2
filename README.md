@@ -61,6 +61,11 @@ UIの一部をアニメーションさせたい場合などは、Photoshop上の
 * Photoshop上の **名前が"Slider"で終わるグループ** は、Unity上でUnityEngine.UI.Sliderとして変換されます。
 * このグループ内で、名前がFillになっているイメージレイヤーがスライドするイメージ(UI.Slider.FillRect)になります。
 
+### Scrollbar
+
+* Photoshop上の **名前が"Scrollbar"で終わるグループ** は、Unity上でUnityEngine.UI.Scrollbarとして変換されます。
+* このグループ内で、名前がHandleになっているイメージレイヤーがスライドするハンドル(UI.Scrollbar.HandleRect)になります。
+
 ### List
 
 * Photoshop上の **名前が"List"で終わるグループ** は、Unity上でBaum2.Listとして変換されます。
@@ -80,5 +85,5 @@ UIの一部をアニメーションさせたい場合などは、Photoshop上の
 
 ## 動作確認環境
 
-* Unity: Unity5.3.4p4
-* PhotoshopScript: Adobe Photoshop CC 2015.5
+* Unity: Unity5.6.1p1
+* PhotoshopScript: Adobe Photoshop CC 2017
