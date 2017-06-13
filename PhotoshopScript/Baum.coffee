@@ -242,18 +242,13 @@ class PsdToJson
     if layer.kind == LayerKind.TEXT
       text = layer.textItem
 
-      transform = @getActiveLayerTransform()
-      angle = @angleFromMatrix(transform.yy, transform.xy)
-      angle = 0 if angle == -90 # 謎の回転対策
-
       vx = layer.bounds[0].value
       ww = layer.bounds[2].value - layer.bounds[0].value
       vh = layer.bounds[3].value - layer.bounds[1].value
       originalText = text.contents
       text.contents = "-"
 
-      vy = layer.bounds[1].value
-      layer.rotate(angle)
+      vy = layer.bounds[1].value - (layer.bounds[3].value - layer.bounds[1].value) / 2.0
 
       align = ''
       textColor = 0x000000
@@ -276,7 +271,6 @@ class PsdToJson
         h: layer.bounds[3].value - layer.bounds[1].value
         vh: vh
         opacity: Math.round(layer.opacity * 10.0)/10.0
-        angle: Math.round(angle * 100.0)/100.0
       }
     else if opt['mask']
       hash = {

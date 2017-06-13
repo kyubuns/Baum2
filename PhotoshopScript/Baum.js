@@ -334,23 +334,17 @@
     };
 
     PsdToJson.prototype.layerToHash = function(document, name, opt, layer) {
-      var align, angle, e, hash, originalText, text, textColor, transform, vh, vx, vy, ww;
+      var align, e, hash, originalText, text, textColor, vh, vx, vy, ww;
       document.activeLayer = layer;
       hash = {};
       if (layer.kind === LayerKind.TEXT) {
         text = layer.textItem;
-        transform = this.getActiveLayerTransform();
-        angle = this.angleFromMatrix(transform.yy, transform.xy);
-        if (angle === -90) {
-          angle = 0;
-        }
         vx = layer.bounds[0].value;
         ww = layer.bounds[2].value - layer.bounds[0].value;
         vh = layer.bounds[3].value - layer.bounds[1].value;
         originalText = text.contents;
         text.contents = "-";
-        vy = layer.bounds[1].value;
-        layer.rotate(angle);
+        vy = layer.bounds[1].value - (layer.bounds[3].value - layer.bounds[1].value) / 2.0;
         align = '';
         textColor = 0x000000;
         try {
@@ -372,8 +366,7 @@
           w: ww,
           h: layer.bounds[3].value - layer.bounds[1].value,
           vh: vh,
-          opacity: Math.round(layer.opacity * 10.0) / 10.0,
-          angle: Math.round(angle * 100.0) / 100.0
+          opacity: Math.round(layer.opacity * 10.0) / 10.0
         };
       } else if (opt['mask']) {
         hash = {
