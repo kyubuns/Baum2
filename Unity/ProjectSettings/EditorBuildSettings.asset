@@ -4,4 +4,7 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Baum2/Sample/Sample.unity
+    guid: f7193a0bdf6404c69865c192b0d915a9
