@@ -19,14 +19,14 @@ namespace Baum2
 			return go;
 		}
 
-		public T Get<T>(string name) where T : Component
+		public T Get<T>(string name, bool noError = false) where T : Component
 		{
 			var go = cache.Get(name);
-			Assert.IsNotNull(go, string.Format("[Baum2] \"{0}\" is not found", name));
+			if (!noError) Assert.IsNotNull(go, string.Format("[Baum2] \"{0}\" is not found", name));
 			if (go == null) return null;
 
 			var t = GetComponent<T>(go);
-			Assert.IsNotNull(t, string.Format("[Baum2] \"{0}<{1}>\" is not found", name, typeof(T).Name));
+			if (!noError) Assert.IsNotNull(t, string.Format("[Baum2] \"{0}<{1}>\" is not found", name, typeof(T).Name));
 			return t;
 		}
 

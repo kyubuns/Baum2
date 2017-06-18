@@ -15,7 +15,7 @@ namespace Baum2.Sample
 		public void Start()
 		{
 			UI = BaumUI.Instantiate(gameObject, UIPrefab);
-			ListSize = 5;
+			ListSize = 10;
 			ImageSample();
 			ButtonSample();
 			ListSample();
@@ -65,7 +65,14 @@ namespace Baum2.Sample
 			};
 			list.UIFactory = (UIRoot ui, int index) =>
 			{
+				ui.gameObject.name = "ListItem" + index;
 				ui.Get<Text>("ListItemText").text = string.Format("Piyo: {0}", index);
+
+				var button = ui.Get<Button>("ItemButton", true);
+				if (button != null)
+				{
+					button.onClick.AddListener(() => Debug.Log(index));
+				}
 			};
 			list.Resize(ListSize);
 		}
