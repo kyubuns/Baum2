@@ -140,6 +140,7 @@ namespace Baum2
 		{
 			var item = Instantiate(ItemSources.Find(x => x.name == sourceName));
 			item.transform.SetParent(Content.transform);
+			item.transform.localPosition = Vector3.zero;
 			item.transform.localScale = Vector3.one;
 			item.SetActive(true);
 			updateSize = true;
