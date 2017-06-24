@@ -199,13 +199,11 @@ namespace Baum2.Editor
 
 			var image = go.AddComponent<Image>();
 			image.sprite = renderer.GetSprite(spriteName);
-			image.raycastTarget = false;
 			image.type = Image.Type.Sliced;
 			image.color = new Color(1.0f, 1.0f, 1.0f, opacity / 100.0f);
 
 			if (background)
 			{
-				image.raycastTarget = true;
 				rect.anchorMin = Vector2.zero;
 				rect.anchorMax = Vector2.one;
 				rect.sizeDelta = Vector2.zero;
@@ -322,7 +320,6 @@ namespace Baum2.Editor
 			if (lastImage != null)
 			{
 				button.targetGraphic = lastImage;
-				lastImage.raycastTarget = true;
 			}
 
 			return go;
@@ -498,7 +495,6 @@ namespace Baum2.Editor
 				scrollbar.handleRect = handleRect;
 
 				handleRect.sizeDelta = Vector2.zero;
-				handleImage.raycastTarget = true;
 			}
 
 			return go;
