@@ -100,7 +100,7 @@ class Baum
         @rasterizeAll(layer)
       else if layer.typename == 'ArtLayer'
         if layer.kind != LayerKind.TEXT
-          layer.rasterize(RasterizeType.ENTIRELAYER)
+          @rasterize(layer)
       else
         alert(layer)
 
@@ -115,6 +115,24 @@ class Baum
       else
         t += 1
 
+  rasterize: (layer) ->
+    tmp = app.activeDocument.activeLayer
+    app.activeDocument.activeLayer = layer
+    idrasterizeLayer = stringIDToTypeID("rasterizeLayer")
+    desc5 = new ActionDescriptor()
+    idnull = charIDToTypeID("null")
+    ref4 = new ActionReference()
+    idLyr = charIDToTypeID("Lyr ")
+    idOrdn = charIDToTypeID("Ordn")
+    idTrgt = charIDToTypeID("Trgt")
+    ref4.putEnumerated(idLyr,idOrdn,idTrgt)
+    desc5.putReference(idnull,ref4)
+    idWhat = charIDToTypeID("What")
+    idrasterizeItem = stringIDToTypeID("rasterizeItem")
+    idlayerStyle = stringIDToTypeID("layerStyle")
+    desc5.putEnumerated(idWhat,idrasterizeItem,idlayerStyle)
+    executeAction(idrasterizeLayer,desc5,DialogModes.NO)
+    app.activeDocument.activeLayer = tmp
 
   ungroupArtboard: (document) ->
     for layer in document.layers

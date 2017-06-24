@@ -135,7 +135,7 @@
           this.rasterizeAll(layer);
         } else if (layer.typename === 'ArtLayer') {
           if (layer.kind !== LayerKind.TEXT) {
-            layer.rasterize(RasterizeType.ENTIRELAYER);
+            this.rasterize(layer);
           }
         } else {
           alert(layer);
@@ -156,6 +156,27 @@
         }
       }
       return results;
+    };
+
+    Baum.prototype.rasterize = function(layer) {
+      var desc5, idLyr, idOrdn, idTrgt, idWhat, idlayerStyle, idnull, idrasterizeItem, idrasterizeLayer, ref4, tmp;
+      tmp = app.activeDocument.activeLayer;
+      app.activeDocument.activeLayer = layer;
+      idrasterizeLayer = stringIDToTypeID("rasterizeLayer");
+      desc5 = new ActionDescriptor();
+      idnull = charIDToTypeID("null");
+      ref4 = new ActionReference();
+      idLyr = charIDToTypeID("Lyr ");
+      idOrdn = charIDToTypeID("Ordn");
+      idTrgt = charIDToTypeID("Trgt");
+      ref4.putEnumerated(idLyr, idOrdn, idTrgt);
+      desc5.putReference(idnull, ref4);
+      idWhat = charIDToTypeID("What");
+      idrasterizeItem = stringIDToTypeID("rasterizeItem");
+      idlayerStyle = stringIDToTypeID("layerStyle");
+      desc5.putEnumerated(idWhat, idrasterizeItem, idlayerStyle);
+      executeAction(idrasterizeLayer, desc5, DialogModes.NO);
+      return app.activeDocument.activeLayer = tmp;
     };
 
     Baum.prototype.ungroupArtboard = function(document) {
