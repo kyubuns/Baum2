@@ -128,6 +128,19 @@ namespace Baum2
 			set
 			{
 				uiFactory = value;
+			}
+		}
+
+		private Action<UIRoot, int> uiUpdater;
+		public Action<UIRoot, int> UIUpdater
+		{
+			get
+			{
+				return uiUpdater;
+			}
+			set
+			{
+				uiUpdater = value;
 				UpdateAll();
 			}
 		}
@@ -168,20 +181,21 @@ namespace Baum2
 			for (int i = 0; i < size; ++i)
 			{
 				var item = AddItem(uiSelector(i));
-				uiFactory(item, i);
+				if (uiFactory != null) uiFactory(item, i);
+				if (uiUpdater != null) uiUpdater(item, i);
 			}
 		}
 
 		public void UpdateItem(int index)
 		{
-			uiFactory(items[index], index);
+			if (uiUpdater != null) uiUpdater(items[index], index);
 		}
 
 		public void UpdateAll()
 		{
 			for (int i = 0; i < items.Count; ++i)
 			{
-				uiFactory(items[i], i);
+				if (uiUpdater != null) uiUpdater(items[i], i);
 			}
 		}
 
