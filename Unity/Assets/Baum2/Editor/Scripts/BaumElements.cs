@@ -409,11 +409,28 @@ namespace Baum2.Editor
 				if (item == null) throw new Exception(string.Format("{0}'s element {1} is not group", Name, element.Name));
 
 				var itemObject = item.Render(renderer);
-				var layout = itemObject.AddComponent<LayoutElement>();
-				if (scroll == "Vertical") layout.minHeight = item.CalcArea().Height;
-				else if (scroll == "Horizontal") layout.minWidth = item.CalcArea().Width;
-
 				itemObject.transform.SetParent(go.transform);
+
+				var globalPosition = itemObject.transform.position;
+				var rect = itemObject.GetComponent<RectTransform>();
+				rect.anchorMin = new Vector2(0.0f, 1.0f);
+				rect.anchorMax = new Vector2(0.0f, 1.0f);
+				itemObject.transform.position = globalPosition;
+
+				var layout = itemObject.AddComponent<LayoutElement>();
+				layout.minHeight = item.CalcArea().Height;
+				layout.minWidth = item.CalcArea().Width;
+				if (scroll == "Vertical")
+				{
+					rect.sizeDelta = new Vector2(rect.anchoredPosition.x * 2.0f, rect.sizeDelta.y);
+					layout.minHeight = rect.anchoredPosition.x * 2.0f;
+				}
+				if (scroll == "Horizontal")
+				{
+					rect.sizeDelta = new Vector2(rect.sizeDelta.x, rect.anchoredPosition.y * 2.0f);
+					layout.minWidth = rect.anchoredPosition.y * 2.0f;
+				}
+
 				itemObject.SetActive(false);
 
 				items.Add(itemObject);
