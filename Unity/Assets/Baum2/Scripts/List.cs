@@ -96,6 +96,18 @@ namespace Baum2
 			}
 		}
 
+		public RectOffset Padding
+		{
+			get
+			{
+				return LayoutGroup.padding;
+			}
+			set
+			{
+				LayoutGroup.padding = value;
+			}
+		}
+
 		public int Count
 		{
 			get
@@ -240,6 +252,8 @@ namespace Baum2
 				.Select(s => ItemSources.Find(x => x.name == s))
 				.Sum(x => x.GetComponent<RectTransform>().sizeDelta[axis]);
 			result += Spacing * (itemSize - 1);
+			if (axis == 1) result += Padding.top + Padding.bottom;
+			if (axis == 0) result += Padding.left + Padding.right;
 			return result;
 		}
 	}
