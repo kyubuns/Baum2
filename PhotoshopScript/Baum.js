@@ -131,6 +131,9 @@
         if (layer.visible === false) {
           removeLayers.push(layer);
         }
+        if (layer.bounds[0].value === 0 && layer.bounds[1].value === 0 && layer.bounds[2].value === 0 && layer.bounds[3].value === 0) {
+          removeLayers.push(layer);
+        }
         if (layer.typename === 'LayerSet') {
           this.rasterizeAll(layer);
         } else if (layer.typename === 'ArtLayer') {
