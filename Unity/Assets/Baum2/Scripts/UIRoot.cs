@@ -35,5 +35,11 @@ namespace Baum2
 			if (go == null) return null;
 			return go.GetComponent<T>();
 		}
+
+		public void Reload()
+		{
+			cache.List.Clear();
+			cache.CreateCache(transform);
+		}
 	}
 }
