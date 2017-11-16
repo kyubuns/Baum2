@@ -18,7 +18,8 @@ namespace Baum2
         {
             get
             {
-                if (contentCache == null) contentCache = gameObject.transform.Find("Content").gameObject;
+                if (contentCache != null) return contentCache;
+                contentCache = gameObject.transform.Find("Content").gameObject;
                 return contentCache;
             }
         }
@@ -28,7 +29,8 @@ namespace Baum2
         {
             get
             {
-                if (contentRectTransformCache == null) contentRectTransformCache = Content.GetComponent<RectTransform>();
+                if (contentRectTransformCache != null) return contentRectTransformCache;
+                contentRectTransformCache = Content.GetComponent<RectTransform>();
                 return contentRectTransformCache;
             }
         }
@@ -38,7 +40,8 @@ namespace Baum2
         {
             get
             {
-                if (rectTransformCache == null) rectTransformCache = GetComponent<RectTransform>();
+                if (rectTransformCache != null) return rectTransformCache;
+                rectTransformCache = GetComponent<RectTransform>();
                 return rectTransformCache;
             }
         }
@@ -48,7 +51,8 @@ namespace Baum2
         {
             get
             {
-                if (scrollRectCache == null) scrollRectCache = GetComponent<ScrollRect>();
+                if (scrollRectCache != null) return scrollRectCache;
+                scrollRectCache = GetComponent<ScrollRect>();
                 return scrollRectCache;
             }
         }
@@ -58,7 +62,8 @@ namespace Baum2
         {
             get
             {
-                if (layoutGroupCache == null) layoutGroupCache = Content.GetComponent<LayoutGroup>();
+                if (layoutGroupCache != null) return layoutGroupCache;
+                layoutGroupCache = Content.GetComponent<LayoutGroup>();
                 return layoutGroupCache;
             }
         }
@@ -85,8 +90,8 @@ namespace Baum2
             get
             {
                 if (LayoutGroup is HorizontalLayoutGroup) return ((HorizontalLayoutGroup)LayoutGroup).spacing;
-                else if (LayoutGroup is VerticalLayoutGroup) return ((VerticalLayoutGroup)LayoutGroup).spacing;
-                else throw new ApplicationException("LayoutGroup not found");
+                if (LayoutGroup is VerticalLayoutGroup) return ((VerticalLayoutGroup)LayoutGroup).spacing;
+                throw new ApplicationException("LayoutGroup not found");
             }
             set
             {
@@ -159,7 +164,7 @@ namespace Baum2
 
         private int itemSize;
         private bool updateSize;
-        private List<UIRoot> items = new List<UIRoot>();
+        private readonly List<UIRoot> items = new List<UIRoot>();
 
         private UIRoot AddItem(string sourceName)
         {
@@ -182,7 +187,7 @@ namespace Baum2
 
         public void Resize(int size)
         {
-            this.itemSize = size;
+            itemSize = size;
 
             foreach (Transform item in Content.transform)
             {
@@ -190,7 +195,7 @@ namespace Baum2
             }
             items.Clear();
 
-            for (int i = 0; i < size; ++i)
+            for (var i = 0; i < size; ++i)
             {
                 var item = AddItem(uiSelector(i));
                 if (uiFactory != null) uiFactory(item, i);
@@ -205,7 +210,7 @@ namespace Baum2
 
         public void UpdateAll()
         {
-            for (int i = 0; i < items.Count; ++i)
+            for (var i = 0; i < items.Count; ++i)
             {
                 if (uiUpdater != null) uiUpdater(items[i], i);
             }

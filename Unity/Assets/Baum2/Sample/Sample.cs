@@ -1,21 +1,20 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using Baum2;
 
 namespace Baum2.Sample
 {
     public class Sample : MonoBehaviour
     {
         [SerializeField]
-        private GameObject UIPrefab;
+        private GameObject uiPrefab;
 
-        private UIRoot UI;
-        private int ListSize;
+        private UIRoot ui;
+        private int listSize;
 
         public void Start()
         {
-            UI = BaumUI.Instantiate(gameObject, UIPrefab);
-            ListSize = 10;
+            ui = BaumUI.Instantiate(gameObject, uiPrefab);
+            listSize = 10;
             ImageSample();
             ButtonSample();
             ListSample();
@@ -28,58 +27,55 @@ namespace Baum2.Sample
 
         public void ImageSample()
         {
-            UI.Get("Image1").SetActive(false);
-            UI.Get("Image2").SetActive(false);
+            ui.Get("Image1").SetActive(false);
+            ui.Get("Image2").SetActive(false);
         }
 
         public void ButtonSample()
         {
-            var welcomeText = UI.Get<Text>("Welcome/Text");
-            var list = UI.Get<List>("PiyoList");
+            var welcomeText = ui.Get<Text>("Welcome/Text");
+            var list = ui.Get<List>("PiyoList");
 
-            UI.Get<Button>("HogeButton").onClick.AddListener(() =>
+            ui.Get<Button>("HogeButton").onClick.AddListener(() =>
             {
                 welcomeText.text = "Welcome to Hoge!";
-                UI.Get("Image1").SetActive(true);
-                UI.Get("Image2").SetActive(false);
-                list.Resize(++ListSize);
+                ui.Get("Image1").SetActive(true);
+                ui.Get("Image2").SetActive(false);
+                list.Resize(++listSize);
             });
 
-            UI.Get<Button>("FugaButton").onClick.AddListener(() =>
+            ui.Get<Button>("FugaButton").onClick.AddListener(() =>
             {
                 welcomeText.text = "Welcome to Fuga!";
-                UI.Get("Image1").SetActive(false);
-                UI.Get("Image2").SetActive(true);
-                list.Resize(--ListSize);
+                ui.Get("Image1").SetActive(false);
+                ui.Get("Image2").SetActive(true);
+                list.Resize(--listSize);
             });
         }
 
         public void ListSample()
         {
-            var list = UI.Get<List>("PiyoList");
-            list.Scrollbar = UI.Get<Scrollbar>("PiyoScrollbar");
+            var list = ui.Get<List>("PiyoList");
+            list.Scrollbar = ui.Get<Scrollbar>("PiyoScrollbar");
             list.Spacing = 10;
-            list.UISelector = (int index) =>
+            list.UISelector = index => index % 2 == 0 ? "Item1" : "Item2";
+            list.UIFactory = (listUI, index) =>
             {
-                return index % 2 == 0 ? "Item1" : "Item2";
-            };
-            list.UIFactory = (UIRoot ui, int index) =>
-            {
-                ui.gameObject.name = "ListItem" + index;
-                ui.Get<Text>("ListItemText").text = string.Format("Piyo: {0}", index);
+                listUI.gameObject.name = "ListItem" + index;
+                listUI.Get<Text>("ListItemText").text = string.Format("Piyo: {0}", index);
 
-                var button = ui.Get<Button>("ItemButton", true);
+                var button = listUI.Get<Button>("ItemButton", true);
                 if (button != null)
                 {
                     button.onClick.AddListener(() => Debug.Log(index));
                 }
             };
-            list.Resize(ListSize);
+            list.Resize(listSize);
         }
 
         public void SliderSample()
         {
-            UI.Get<Slider>("HPSlider").value = Mathf.Clamp01(Time.time % 1.0f);
+            ui.Get<Slider>("HPSlider").value = Mathf.Clamp01(Time.time % 1.0f);
         }
     }
 }

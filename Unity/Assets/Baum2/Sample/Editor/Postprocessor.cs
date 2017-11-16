@@ -12,8 +12,7 @@ namespace Baum2.Sample
 
             foreach (var button in go.GetComponentsInChildren<Button>())
             {
-                var nav = new Navigation();
-                nav.mode = Navigation.Mode.None;
+                var nav = new Navigation {mode = Navigation.Mode.None};
                 button.navigation = nav;
             }
         }

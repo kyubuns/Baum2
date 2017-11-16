@@ -5,28 +5,28 @@ namespace Baum2
 {
     public class UIRoot : MonoBehaviour
     {
-        Cache cache;
+        private Cache cache;
 
         public void Awake()
         {
             cache = GetComponent<Cache>();
         }
 
-        public GameObject Get(string name)
+        public GameObject Get(string gameObjectName)
         {
-            var go = cache.Get(name);
-            Assert.IsNotNull(go, string.Format("[Baum2] \"{0}\" is not found", name));
+            var go = cache.Get(gameObjectName);
+            Assert.IsNotNull(go, string.Format("[Baum2] \"{0}\" is not found", gameObjectName));
             return go;
         }
 
-        public T Get<T>(string name, bool noError = false) where T : Component
+        public T Get<T>(string gameObjectName, bool noError = false) where T : Component
         {
-            var go = cache.Get(name);
-            if (!noError) Assert.IsNotNull(go, string.Format("[Baum2] \"{0}\" is not found", name));
+            var go = cache.Get(gameObjectName);
+            if (!noError) Assert.IsNotNull(go, string.Format("[Baum2] \"{0}\" is not found", gameObjectName));
             if (go == null) return null;
 
             var t = GetComponent<T>(go);
-            if (!noError) Assert.IsNotNull(t, string.Format("[Baum2] \"{0}<{1}>\" is not found", name, typeof(T).Name));
+            if (!noError) Assert.IsNotNull(t, string.Format("[Baum2] \"{0}<{1}>\" is not found", gameObjectName, typeof(T).Name));
             return t;
         }
 

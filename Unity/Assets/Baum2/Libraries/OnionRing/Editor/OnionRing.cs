@@ -11,29 +11,29 @@ namespace OnionRing
             return slicer.Slice(pixels);
         }
 
-        private int width;
-        private int height;
-        private int[] pixels;
-        private readonly int safetyMargin = 2;
-        private readonly int margin = 2;
+        private readonly int width;
+        private readonly int height;
+        private readonly int[] pixels;
+        private const int SafetyMargin = 2;
+        private const int Margin = 2;
 
-        private TextureSlicer(Texture2D refTexture, Color[] getPixels)
+        private TextureSlicer(Texture refTexture, Color[] getPixels)
         {
-            this.width = refTexture.width;
-            this.height = refTexture.height;
+            width = refTexture.width;
+            height = refTexture.height;
 
-            this.pixels = new int[getPixels.Length];
-            for (int i = 0; i < getPixels.Length; ++i) this.pixels[i] = getPixels[i].a > 0 ? getPixels[i].GetHashCode() : 0;
+            pixels = new int[getPixels.Length];
+            for (var i = 0; i < getPixels.Length; ++i) pixels[i] = getPixels[i].a > 0 ? getPixels[i].GetHashCode() : 0;
         }
 
-        private void CalcLine(ulong[] list, out int start, out int end)
+        private static void CalcLine(ulong[] list, out int start, out int end)
         {
             start = 0;
             end = 0;
-            int tmpStart = 0;
-            int tmpEnd = 0;
-            ulong tmpHash = list[0];
-            for (int i = 0; i < list.Length; ++i)
+            var tmpStart = 0;
+            var tmpEnd = 0;
+            var tmpHash = list[0];
+            for (var i = 0; i < list.Length; ++i)
             {
                 if (tmpHash == list[i])
                 {
@@ -57,21 +57,19 @@ namespace OnionRing
                 end = tmpEnd;
             }
 
-            end -= (safetyMargin * 2 + margin);
-            if (end < start)
-            {
-                start = 0;
-                end = 0;
-            }
+            end -= SafetyMargin * 2 + Margin;
+            if (end >= start) return;
+            start = 0;
+            end = 0;
         }
 
         private ulong[] CreateHashListX(int aMax, int bMax)
         {
             var hashList = new ulong[aMax];
-            for (int a = 0; a < aMax; ++a)
+            for (var a = 0; a < aMax; ++a)
             {
                 ulong line = 0;
-                for (int b = 0; b < bMax; ++b) line = (ulong)(line + (ulong)(pixels[b * width + a] * b)).GetHashCode();
+                for (var b = 0; b < bMax; ++b) line = (ulong)(line + (ulong)(pixels[b * width + a] * b)).GetHashCode();
                 hashList[a] = line;
             }
             return hashList;
@@ -80,10 +78,10 @@ namespace OnionRing
         private ulong[] CreateHashListY(int aMax, int bMax)
         {
             var hashList = new ulong[aMax];
-            for (int a = 0; a < aMax; ++a)
+            for (var a = 0; a < aMax; ++a)
             {
                 ulong line = 0;
-                for (int b = 0; b < bMax; ++b) line = (ulong)(line + (ulong)(pixels[a * width + b] * b)).GetHashCode();
+                for (var b = 0; b < bMax; ++b) line = (ulong)(line + (ulong)(pixels[a * width + b] * b)).GetHashCode();
                 hashList[a] = line;
             }
             return hashList;
@@ -103,7 +101,7 @@ namespace OnionRing
                 CalcLine(hashList, out yStart, out yEnd);
             }
 
-            bool skipX = false;
+            var skipX = false;
             if (xEnd - xStart < 2)
             {
                 skipX = true;
@@ -111,7 +109,7 @@ namespace OnionRing
                 xEnd = 0;
             }
 
-            bool skipY = false;
+            var skipY = false;
             if (yEnd - yStart < 2)
             {
                 skipY = true;
@@ -119,10 +117,10 @@ namespace OnionRing
                 yEnd = 0;
             }
             var output = GenerateSlicedTexture(xStart, xEnd, yStart, yEnd, originalPixels);
-            int left = xStart + safetyMargin;
-            int bottom = yStart + safetyMargin;
-            int right = width - xEnd - safetyMargin - margin;
-            int top = height - yEnd - safetyMargin - margin;
+            var left = xStart + SafetyMargin;
+            var bottom = yStart + SafetyMargin;
+            var right = width - xEnd - SafetyMargin - Margin;
+            var top = height - yEnd - SafetyMargin - Margin;
             if (skipX)
             {
                 left = 0;

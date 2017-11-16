@@ -17,6 +17,8 @@ namespace Baum2.Editor
             if (assetPath.Contains(EditorUtil.ImportDirectoryPath))
             {
                 var importer = assetImporter as TextureImporter;
+                if (importer == null) return;
+
                 importer.textureType = TextureImporterType.Sprite;
                 importer.isReadable = true;
             }
@@ -25,6 +27,8 @@ namespace Baum2.Editor
                 var fileName = Path.GetFileName(assetPath);
                 if (SlicedTextures == null || !SlicedTextures.ContainsKey(fileName)) return;
                 var importer = assetImporter as TextureImporter;
+                if (importer == null) return;
+
                 importer.textureType = TextureImporterType.Sprite;
                 importer.spriteImportMode = SpriteImportMode.Single;
                 importer.spritePackingTag = string.Format("{0}_{1}", "Baum2", Path.GetFileName(Path.GetDirectoryName(assetPath)));

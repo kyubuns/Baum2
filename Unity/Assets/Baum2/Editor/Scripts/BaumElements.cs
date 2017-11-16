@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -9,17 +8,17 @@ namespace Baum2.Editor
 {
     public abstract class Element
     {
-        public static Dictionary<string, Func<Dictionary<string, object>, Element>> Generator = new Dictionary<string, Func<Dictionary<string, object>, Element>>()
+        public static readonly Dictionary<string, Func<Dictionary<string, object>, Element>> Generator = new Dictionary<string, Func<Dictionary<string, object>, Element>>()
         {
-            { "Root", (d) => { return new RootElement(d); } },
-            { "Image", (d) => { return new ImageElement(d); } },
-            { "Mask", (d) => { return new MaskElement(d); } },
-            { "Group", (d) => { return new GroupElement(d); } },
-            { "Text", (d) => { return new TextElement(d); } },
-            { "Button", (d) => { return new ButtonElement(d); } },
-            { "List", (d) => { return new ListElement(d); } },
-            { "Slider", (d) => { return new SliderElement(d); } },
-            { "Scrollbar", (d) => { return new ScrollbarElement(d); } },
+            { "Root", (d) => new RootElement(d)},
+            { "Image", (d) => new ImageElement(d)},
+            { "Mask", (d) => new MaskElement(d)},
+            { "Group", (d) => new GroupElement(d)},
+            { "Text", (d) => new TextElement(d)},
+            { "Button", (d) => new ButtonElement(d)},
+            { "List", (d) => new ListElement(d)},
+            { "Slider", (d) => new SliderElement(d)},
+            { "Scrollbar", (d) => new ScrollbarElement(d)},
         };
 
         public string Name;
@@ -38,7 +37,7 @@ namespace Baum2.Editor
     public class GroupElement : Element
     {
         protected string pivot;
-        protected List<Element> elements;
+        protected readonly List<Element> elements;
 
         public GroupElement(Dictionary<string, object> json)
         {
@@ -49,7 +48,7 @@ namespace Baum2.Editor
             var jsonElements = json.Get<List<object>>("elements");
             foreach (var jsonElement in jsonElements)
             {
-                elements.Add(Element.Generate(jsonElement as Dictionary<string, object>));
+                elements.Add(Generate(jsonElement as Dictionary<string, object>));
             }
             elements.Reverse();
         }

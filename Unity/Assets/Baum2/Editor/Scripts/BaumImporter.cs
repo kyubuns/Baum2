@@ -19,7 +19,7 @@ namespace Baum2.Editor
             {
                 if (!asset.Contains(EditorUtil.ImportDirectoryPath)) continue;
                 if (!string.IsNullOrEmpty(Path.GetExtension(asset))) continue;
-                CreateSpritesDirectory(asset, importedAssets);
+                CreateSpritesDirectory(asset);
                 changed = true;
             }
 
@@ -58,7 +58,7 @@ namespace Baum2.Editor
                     var creator = new PrefabCreator(spriteRootPath, fontRootPath, asset);
                     var go = creator.Create();
                     var savePath = EditorUtil.ToUnityPath(Path.Combine(EditorUtil.GetBaumPrefabsPath(), name + ".prefab"));
-                    UnityEngine.Object originalPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(savePath);
+                    Object originalPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(savePath);
                     if (originalPrefab == null) originalPrefab = PrefabUtility.CreateEmptyPrefab(savePath);
                     PrefabUtility.ReplacePrefab(go, originalPrefab, ReplacePrefabOptions.ReplaceNameBased);
                     GameObject.DestroyImmediate(go);
@@ -69,7 +69,7 @@ namespace Baum2.Editor
             };
         }
 
-        private static void CreateSpritesDirectory(string asset, string[] importedAssets)
+        private static void CreateSpritesDirectory(string asset)
         {
             var directoryName = Path.GetFileName(Path.GetFileName(asset));
             var directoryPath = EditorUtil.GetBaumSpritesPath();

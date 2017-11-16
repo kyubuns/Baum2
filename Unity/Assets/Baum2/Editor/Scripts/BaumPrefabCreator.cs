@@ -11,10 +11,10 @@ namespace Baum2.Editor
 {
     public sealed class PrefabCreator
     {
-        private static readonly string[] versions = { "0.1.0", "0.2.0", "0.2.1" };
-        private string spriteRootPath;
-        private string fontRootPath;
-        private string assetPath;
+        private static readonly string[] Versions = { "0.1.0", "0.2.0", "0.2.1" };
+        private readonly string spriteRootPath;
+        private readonly string fontRootPath;
+        private readonly string assetPath;
 
         public PrefabCreator(string spriteRootPath, string fontRootPath, string assetPath)
         {
@@ -63,7 +63,7 @@ namespace Baum2.Editor
         public void Validation(Dictionary<string, object> info)
         {
             var version = info.Get("version");
-            if (!versions.Contains(version)) throw new Exception(string.Format("version {0} is not supported", version));
+            if (!Versions.Contains(version)) throw new Exception(string.Format("version {0} is not supported", version));
         }
 
         public static GameObject CreateUIGameObject(string name)
@@ -76,18 +76,18 @@ namespace Baum2.Editor
 
     public class Renderer
     {
-        private string spriteRootPath;
-        private string fontRootPath;
-        private Vector2 imageSize;
+        private readonly string spriteRootPath;
+        private readonly string fontRootPath;
+        private readonly Vector2 imageSize;
         public Vector2 CanvasSize { get; private set; }
-        private Vector2 basePosition;
+        private readonly Vector2 basePosition;
 
         public Renderer(string spriteRootPath, string fontRootPath, Vector2 imageSize, Vector2 canvasSize, Vector2 basePosition)
         {
             this.spriteRootPath = spriteRootPath;
             this.fontRootPath = fontRootPath;
             this.imageSize = imageSize;
-            this.CanvasSize = canvasSize;
+            CanvasSize = canvasSize;
             this.basePosition = basePosition;
         }
 
@@ -161,18 +161,18 @@ namespace Baum2.Editor
         public void Merge(Area other)
         {
             if (other.Empty) return;
-            if (this.Empty)
+            if (Empty)
             {
-                this.Min = other.Min;
-                this.Max = other.Max;
-                this.Empty = false;
+                Min = other.Min;
+                Max = other.Max;
+                Empty = false;
                 return;
             }
 
-            if (other.Min.x < this.Min.x) this.Min = new Vector2(other.Min.x, this.Min.y);
-            if (other.Min.y < this.Min.y) this.Min = new Vector2(this.Min.x, other.Min.y);
-            if (other.Max.x > this.Max.x) this.Max = new Vector2(other.Max.x, this.Max.y);
-            if (other.Max.y > this.Max.y) this.Max = new Vector2(this.Max.x, other.Max.y);
+            if (other.Min.x < Min.x) Min = new Vector2(other.Min.x, Min.y);
+            if (other.Min.y < Min.y) Min = new Vector2(Min.x, other.Min.y);
+            if (other.Max.x > Max.x) Max = new Vector2(other.Max.x, Max.y);
+            if (other.Max.y > Max.y) Max = new Vector2(Max.x, other.Max.y);
         }
     }
 
