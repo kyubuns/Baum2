@@ -22,9 +22,9 @@ namespace Baum2
                 Array.Reverse(Path);
             }
 
-            public readonly string Name;
-            public readonly GameObject GameObject;
-            public readonly string[] Path;
+            public string Name;
+            public GameObject GameObject;
+            public string[] Path;
         }
 
         public void CreateCache(Transform root, List<string> route = null)
