@@ -25,6 +25,7 @@ class Baum
     @documentName = app.activeDocument.name[0..-5]
 
     copiedDoc = app.activeDocument.duplicate(app.activeDocument.name[..-5] + '.copy.psd')
+    @removeLayers(copiedDoc)
     @resizePsd(copiedDoc)
     @rasterizeAll(copiedDoc)
     @selectDocumentArea(copiedDoc)
@@ -91,13 +92,32 @@ class Baum
     doc.resizeImage(width, height, doc.resolution, ResampleMethod.NEARESTNEIGHBOR)
 
 
-  rasterizeAll: (root) ->
+  removeLayers: (root) ->
     removeLayers = []
+
     for layer in root.layers
       if layer.visible == false
         removeLayers.push(layer)
+        continue
+
       if layer.bounds[0].value == 0 && layer.bounds[1].value == 0 && layer.bounds[2].value == 0 && layer.bounds[3].value == 0
         removeLayers.push(layer)
+        continue
+
+      if layer.name.startsWith('#')
+        removeLayers.push(layer)
+        continue
+
+      if layer.typename == 'LayerSet'
+        @removeLayers(layer)
+
+    if removeLayers.length > 0
+      for i in [removeLayers.length-1..0]
+        removeLayers[i].remove()
+
+
+  rasterizeAll: (root) ->
+    for layer in root.layers
       if layer.typename == 'LayerSet'
         @rasterizeAll(layer)
       else if layer.typename == 'ArtLayer'
@@ -105,10 +125,6 @@ class Baum
           @rasterize(layer)
       else
         alert(layer)
-
-    if removeLayers.length > 0
-      for i in [removeLayers.length-1..0]
-        removeLayers[i].remove()
 
     t = 0
     while(t < root.layers.length)
@@ -233,7 +249,7 @@ class PsdToJson
 
   allLayers: (document, root) ->
     layers = []
-    for layer in root.layers when (layer.visible and (not layer.name.startsWith('#')))
+    for layer in root.layers when layer.visible
       hash = null
       name = layer.name.split("@")[0]
       opt = @parseOption(layer.name.split("@")[1])
@@ -387,10 +403,10 @@ class PsdToImage
 
 
   allLayers: (root) ->
-    for layer in root.layers when (layer.name.startsWith('#') or layer.kind == LayerKind.TEXT)
+    for layer in root.layers when layer.kind == LayerKind.TEXT
       layer.visible = false
 
-    list = for layer in root.layers when (layer.visible and (not layer.name.startsWith('#')))
+    list = for layer in root.layers when layer.visible
       if layer.typename == 'ArtLayer'
         layer.visible = false
         layer

@@ -39,6 +39,7 @@
       }
       this.documentName = app.activeDocument.name.slice(0, -4);
       copiedDoc = app.activeDocument.duplicate(app.activeDocument.name.slice(0, -4) + '.copy.psd');
+      this.removeLayers(copiedDoc);
       this.resizePsd(copiedDoc);
       this.rasterizeAll(copiedDoc);
       this.selectDocumentArea(copiedDoc);
@@ -122,18 +123,42 @@
       return doc.resizeImage(width, height, doc.resolution, ResampleMethod.NEARESTNEIGHBOR);
     };
 
-    Baum.prototype.rasterizeAll = function(root) {
-      var i, j, k, layer, len, ref1, ref2, removeLayers, results, t;
+    Baum.prototype.removeLayers = function(root) {
+      var i, j, k, layer, len, ref1, ref2, removeLayers, results;
       removeLayers = [];
       ref1 = root.layers;
       for (j = 0, len = ref1.length; j < len; j++) {
         layer = ref1[j];
         if (layer.visible === false) {
           removeLayers.push(layer);
+          continue;
         }
         if (layer.bounds[0].value === 0 && layer.bounds[1].value === 0 && layer.bounds[2].value === 0 && layer.bounds[3].value === 0) {
           removeLayers.push(layer);
+          continue;
         }
+        if (layer.name.startsWith('#')) {
+          removeLayers.push(layer);
+          continue;
+        }
+        if (layer.typename === 'LayerSet') {
+          this.removeLayers(layer);
+        }
+      }
+      if (removeLayers.length > 0) {
+        results = [];
+        for (i = k = ref2 = removeLayers.length - 1; ref2 <= 0 ? k <= 0 : k >= 0; i = ref2 <= 0 ? ++k : --k) {
+          results.push(removeLayers[i].remove());
+        }
+        return results;
+      }
+    };
+
+    Baum.prototype.rasterizeAll = function(root) {
+      var j, layer, len, ref1, results, t;
+      ref1 = root.layers;
+      for (j = 0, len = ref1.length; j < len; j++) {
+        layer = ref1[j];
         if (layer.typename === 'LayerSet') {
           this.rasterizeAll(layer);
         } else if (layer.typename === 'ArtLayer') {
@@ -142,11 +167,6 @@
           }
         } else {
           alert(layer);
-        }
-      }
-      if (removeLayers.length > 0) {
-        for (i = k = ref2 = removeLayers.length - 1; ref2 <= 0 ? k <= 0 : k >= 0; i = ref2 <= 0 ? ++k : --k) {
-          removeLayers[i].remove();
         }
       }
       t = 0;
@@ -320,7 +340,7 @@
       ref1 = root.layers;
       for (j = 0, len = ref1.length; j < len; j++) {
         layer = ref1[j];
-        if (!(layer.visible && (!layer.name.startsWith('#')))) {
+        if (!layer.visible) {
           continue;
         }
         hash = null;
@@ -548,7 +568,7 @@
       ref1 = root.layers;
       for (j = 0, len = ref1.length; j < len; j++) {
         layer = ref1[j];
-        if (layer.name.startsWith('#') || layer.kind === LayerKind.TEXT) {
+        if (layer.kind === LayerKind.TEXT) {
           layer.visible = false;
         }
       }
@@ -558,7 +578,7 @@
         results = [];
         for (k = 0, len1 = ref2.length; k < len1; k++) {
           layer = ref2[k];
-          if (layer.visible && (!layer.name.startsWith('#'))) {
+          if (layer.visible) {
             if (layer.typename === 'ArtLayer') {
               layer.visible = false;
               results.push(layer);
