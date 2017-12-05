@@ -85,5 +85,5 @@ UIの一部をアニメーションさせたい場合などは、Photoshop上の
 
 ## 動作確認環境
 
-* Unity: Unity5.6.1p1
+* Unity: Unity2017
 * PhotoshopScript: Adobe Photoshop CC 2017
