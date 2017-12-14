@@ -464,6 +464,7 @@ namespace Baum2.Editor
 
             var slider = go.AddComponent<Slider>();
             slider.transition = Selectable.Transition.None;
+            slider.interactable = false;
             if (fillRect != null)
             {
                 fillRect.localScale = Vector2.zero;
