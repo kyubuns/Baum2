@@ -11,7 +11,7 @@ namespace Baum2.Editor
 {
     public sealed class PrefabCreator
     {
-        private static readonly string[] Versions = { "0.1.0", "0.2.0", "0.2.1" };
+        private static readonly string[] Versions = { "0.3.0" };
         private readonly string spriteRootPath;
         private readonly string fontRootPath;
         private readonly string assetPath;

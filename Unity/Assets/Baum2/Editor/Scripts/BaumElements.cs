@@ -228,7 +228,7 @@ namespace Baum2.Editor
     {
         private string message;
         private string font;
-        private int fontSize;
+        private float fontSize;
         private string align;
         private float virtualHeight;
         private Color fontColor;
@@ -240,7 +240,7 @@ namespace Baum2.Editor
             Name = json.Get("name");
             message = json.Get("text");
             font = json.Get("font");
-            fontSize = json.GetInt("size");
+            fontSize = json.GetFloat("size");
             align = json.Get("align");
             fontColor = EditorUtil.HexToColor(json.Get("color"));
             sizeDelta = json.GetVector2("w", "h");
@@ -256,10 +256,14 @@ namespace Baum2.Editor
             rect.localPosition = renderer.CalcPosition(canvasPosition, sizeDelta);
             rect.sizeDelta = sizeDelta;
 
+            var raw = go.AddComponent<RawData>();
+            raw.Info["font_size"] = fontSize;
+            raw.Info["align"] = align;
+
             var text = go.AddComponent<Text>();
             text.text = message;
             text.font = renderer.GetFont(font);
-            text.fontSize = fontSize;
+            text.fontSize = Mathf.RoundToInt(fontSize);
             text.color = fontColor;
             text.horizontalOverflow = HorizontalWrapMode.Overflow;
             text.verticalOverflow = VerticalWrapMode.Overflow;

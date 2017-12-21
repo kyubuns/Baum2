@@ -1,7 +1,7 @@
 `#include "lib/json2.min.js"`
 
 class Baum
-  @version = '0.2.1'
+  @version = '0.3.0'
   @maxLength = 1334
 
   run: ->
@@ -281,7 +281,7 @@ class PsdToJson
       vx = layer.bounds[0].value
       ww = layer.bounds[2].value - layer.bounds[0].value
       vh = layer.bounds[3].value - layer.bounds[1].value
-      originalText = text.contents
+      originalText = text.contents.replace(/\r\n/g, '__CRLF__').replace(/\r/g, '__CRLF__').replace(/\n/g, '__CRLF__').replace(/__CRLF__/g, '\r\n')
       text.contents = "-"
 
       vy = layer.bounds[1].value - (layer.bounds[3].value - layer.bounds[1].value) / 2.0
@@ -298,7 +298,7 @@ class PsdToJson
         type: 'Text'
         text: originalText
         font: text.font
-        size: Math.round(@getTextSize())
+        size: parseFloat(@getTextSize())
         color: textColor
         align: align
         x: vx

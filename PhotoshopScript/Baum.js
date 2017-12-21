@@ -9,7 +9,7 @@
       this.runOneFile = bind(this.runOneFile, this);
     }
 
-    Baum.version = '0.2.1';
+    Baum.version = '0.3.0';
 
     Baum.maxLength = 1334;
 
@@ -386,7 +386,7 @@
         vx = layer.bounds[0].value;
         ww = layer.bounds[2].value - layer.bounds[0].value;
         vh = layer.bounds[3].value - layer.bounds[1].value;
-        originalText = text.contents;
+        originalText = text.contents.replace(/\r\n/g, '__CRLF__').replace(/\r/g, '__CRLF__').replace(/\n/g, '__CRLF__').replace(/__CRLF__/g, '\r\n');
         text.contents = "-";
         vy = layer.bounds[1].value - (layer.bounds[3].value - layer.bounds[1].value) / 2.0;
         align = '';
@@ -402,7 +402,7 @@
           type: 'Text',
           text: originalText,
           font: text.font,
-          size: Math.round(this.getTextSize()),
+          size: parseFloat(this.getTextSize()),
           color: textColor,
           align: align,
           x: vx,
