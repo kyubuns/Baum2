@@ -234,6 +234,9 @@ namespace Baum2.Editor
         private Color fontColor;
         private Vector2 canvasPosition;
         private Vector2 sizeDelta;
+        private bool enableStroke;
+        private int strokeSize;
+        private Color strokeColor;
 
         public TextElement(Dictionary<string, object> json)
         {
@@ -242,6 +245,12 @@ namespace Baum2.Editor
             font = json.Get("font");
             fontSize = json.GetFloat("size");
             align = json.Get("align");
+            if (json.ContainsKey("strokeSize"))
+            {
+                enableStroke = true;
+                strokeSize = json.GetInt("strokeSize");
+                strokeColor = EditorUtil.HexToColor(json.Get("strokeColor"));
+            }
             fontColor = EditorUtil.HexToColor(json.Get("color"));
             sizeDelta = json.GetVector2("w", "h");
             canvasPosition = json.GetVector2("x", "y");
@@ -293,6 +302,14 @@ namespace Baum2.Editor
             var d = rect.sizeDelta;
             d.y = virtualHeight;
             rect.sizeDelta = d;
+
+            if (enableStroke)
+            {
+                var outline = go.AddComponent<Outline>();
+                outline.effectColor = strokeColor;
+                outline.effectDistance = new Vector2(strokeSize / 2.0f, -strokeSize / 2.0f);
+                outline.useGraphicAlpha = false;
+            }
 
             return go;
         }

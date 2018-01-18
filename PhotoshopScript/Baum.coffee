@@ -1,7 +1,7 @@
 `#include "lib/json2.min.js"`
 
 class Baum
-  @version = '0.3.0'
+  @version = '0.4.0'
   @maxLength = 1334
 
   run: ->
@@ -308,6 +308,9 @@ class PsdToJson
         vh: vh
         opacity: Math.round(layer.opacity * 10.0)/10.0
       }
+      if Util.hasStroke(document, layer)
+        hash['strokeSize'] = Util.getStrokeSize(document, layer)
+        hash['strokeColor'] = Util.getStrokeColor(document, layer).rgb.hexValue
     else if opt['mask']
       hash = {
         type: 'Mask'
@@ -537,6 +540,55 @@ class Util
       desc6.putReference(idnull, ref5)
       executeAction(idDlt, desc6, DialogModes.NO)
     catch e
+
+  @hasStroke: (doc, layer) ->
+    doc.activeLayer = layer
+
+    res = false
+    ref = new ActionReference()
+    ref.putEnumerated( charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt") )
+    hasFX = executeActionGet(ref).hasKey(stringIDToTypeID('layerEffects'))
+    if hasFX
+      hasStroke = executeActionGet(ref).getObjectValue(stringIDToTypeID('layerEffects')).hasKey(stringIDToTypeID('frameFX'))
+      if hasStroke
+        desc1 = executeActionGet(ref)
+        desc2 = executeActionGet(ref).getObjectValue(stringIDToTypeID('layerEffects')).getObjectValue(stringIDToTypeID('frameFX'))
+        if desc1.getBoolean(stringIDToTypeID('layerFXVisible')) && desc2.getBoolean(stringIDToTypeID('enabled'))
+          res = true
+    return res
+
+  @getStrokeSize: (doc, layer) ->
+    doc.activeLayer = layer
+    ref = new ActionReference()
+    ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"))
+    desc = executeActionGet(ref).getObjectValue(stringIDToTypeID('layerEffects')).getObjectValue(stringIDToTypeID('frameFX'))
+    return desc.getUnitDoubleValue (stringIDToTypeID('size'))
+
+  @getStrokeColor: (doc, layer) ->
+    doc.activeLayer = layer
+    ref = new ActionReference()
+    ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"))
+    desc = executeActionGet(ref).getObjectValue(stringIDToTypeID('layerEffects')).getObjectValue(stringIDToTypeID('frameFX'))
+    return Util.getColorFromDescriptor(desc.getObjectValue(stringIDToTypeID("color")), typeIDToCharID(desc.getClass(stringIDToTypeID("color"))))
+
+  @getColorFromDescriptor: (colorDesc, keyClass) ->
+    colorObject = new SolidColor()
+    if keyClass == "Grsc"
+      colorObject.grey.grey = color.getDouble(charIDToTypeID('Gry '))
+    if keyClass == "RGBC"
+      colorObject.rgb.red = colorDesc.getDouble(charIDToTypeID('Rd  '))
+      colorObject.rgb.green = colorDesc.getDouble(charIDToTypeID('Grn '))
+      colorObject.rgb.blue = colorDesc.getDouble(charIDToTypeID('Bl  '))
+    if keyClass == "CMYC"
+      colorObject.cmyk.cyan = colorDesc.getDouble(charIDToTypeID('Cyn '))
+      colorObject.cmyk.magenta = colorDesc.getDouble(charIDToTypeID('Mgnt'))
+      colorObject.cmyk.yellow = colorDesc.getDouble(charIDToTypeID('Ylw '))
+      colorObject.cmyk.black = colorDesc.getDouble(charIDToTypeID('Blck'))
+    if keyClass == "LbCl"
+      colorObject.lab.l = colorDesc.getDouble(charIDToTypeID('Lmnc'))
+      colorObject.lab.a = colorDesc.getDouble(charIDToTypeID('A   '))
+      colorObject.lab.b = colorDesc.getDouble(charIDToTypeID('B   '))
+    return colorObject
 
 String.prototype.startsWith = (str) ->
   return this.slice(0, str.length) == str
