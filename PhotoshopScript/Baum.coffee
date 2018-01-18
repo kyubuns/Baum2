@@ -25,6 +25,7 @@ class Baum
     @documentName = app.activeDocument.name[0..-5]
 
     copiedDoc = app.activeDocument.duplicate(app.activeDocument.name[..-5] + '.copy.psd')
+    Util.deselectLayers()
     @removeLayers(copiedDoc)
     @resizePsd(copiedDoc)
     @rasterizeAll(copiedDoc)
@@ -589,6 +590,14 @@ class Util
       colorObject.lab.a = colorDesc.getDouble(charIDToTypeID('A   '))
       colorObject.lab.b = colorDesc.getDouble(charIDToTypeID('B   '))
     return colorObject
+
+  @deselectLayers: ->
+    desc01 = new ActionDescriptor()
+    ref01 = new ActionReference()
+    ref01.putEnumerated( charIDToTypeID('Lyr '), charIDToTypeID('Ordn'), charIDToTypeID('Trgt') )
+    desc01.putReference( charIDToTypeID('null'), ref01 )
+    executeAction( stringIDToTypeID('selectNoLayers'), desc01, DialogModes.NO )
+
 
 String.prototype.startsWith = (str) ->
   return this.slice(0, str.length) == str

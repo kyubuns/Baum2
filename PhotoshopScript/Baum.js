@@ -39,6 +39,7 @@
       }
       this.documentName = app.activeDocument.name.slice(0, -4);
       copiedDoc = app.activeDocument.duplicate(app.activeDocument.name.slice(0, -4) + '.copy.psd');
+      Util.deselectLayers();
       this.removeLayers(copiedDoc);
       this.resizePsd(copiedDoc);
       this.rasterizeAll(copiedDoc);
@@ -802,6 +803,15 @@
         colorObject.lab.b = colorDesc.getDouble(charIDToTypeID('B   '));
       }
       return colorObject;
+    };
+
+    Util.deselectLayers = function() {
+      var desc01, ref01;
+      desc01 = new ActionDescriptor();
+      ref01 = new ActionReference();
+      ref01.putEnumerated(charIDToTypeID('Lyr '), charIDToTypeID('Ordn'), charIDToTypeID('Trgt'));
+      desc01.putReference(charIDToTypeID('null'), ref01);
+      return executeAction(stringIDToTypeID('selectNoLayers'), desc01, DialogModes.NO);
     };
 
     return Util;
