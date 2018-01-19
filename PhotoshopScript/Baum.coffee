@@ -137,6 +137,11 @@ class Baum
   rasterize: (layer) ->
     tmp = app.activeDocument.activeLayer
     app.activeDocument.activeLayer = layer
+
+    # 普通にラスタライズ
+    layer.rasterize(RasterizeType.ENTIRELAYER)
+
+    # LayerStyle含めてラスタライズ
     idrasterizeLayer = stringIDToTypeID("rasterizeLayer")
     desc5 = new ActionDescriptor()
     idnull = charIDToTypeID("null")
@@ -151,6 +156,7 @@ class Baum
     idlayerStyle = stringIDToTypeID("layerStyle")
     desc5.putEnumerated(idWhat,idrasterizeItem,idlayerStyle)
     executeAction(idrasterizeLayer,desc5,DialogModes.NO)
+
     app.activeDocument.activeLayer = tmp
 
   ungroupArtboard: (document) ->

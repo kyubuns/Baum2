@@ -186,6 +186,7 @@
       var desc5, idLyr, idOrdn, idTrgt, idWhat, idlayerStyle, idnull, idrasterizeItem, idrasterizeLayer, ref4, tmp;
       tmp = app.activeDocument.activeLayer;
       app.activeDocument.activeLayer = layer;
+      layer.rasterize(RasterizeType.ENTIRELAYER);
       idrasterizeLayer = stringIDToTypeID("rasterizeLayer");
       desc5 = new ActionDescriptor();
       idnull = charIDToTypeID("null");
