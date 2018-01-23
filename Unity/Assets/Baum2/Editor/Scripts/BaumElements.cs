@@ -237,6 +237,7 @@ namespace Baum2.Editor
         private bool enableStroke;
         private int strokeSize;
         private Color strokeColor;
+        private string type;
 
         public TextElement(Dictionary<string, object> json)
         {
@@ -245,6 +246,7 @@ namespace Baum2.Editor
             font = json.Get("font");
             fontSize = json.GetFloat("size");
             align = json.Get("align");
+            type = json.Get("textType");
             if (json.ContainsKey("strokeSize"))
             {
                 enableStroke = true;
@@ -274,25 +276,41 @@ namespace Baum2.Editor
             text.font = renderer.GetFont(font);
             text.fontSize = Mathf.RoundToInt(fontSize);
             text.color = fontColor;
-            text.horizontalOverflow = HorizontalWrapMode.Overflow;
-            text.verticalOverflow = VerticalWrapMode.Overflow;
+
+            bool middle = true;
+            if (type == "point")
+            {
+                text.horizontalOverflow = HorizontalWrapMode.Overflow;
+                text.verticalOverflow = VerticalWrapMode.Overflow;
+                middle = true;
+            }
+            else if (type == "paragraph")
+            {
+                text.horizontalOverflow = HorizontalWrapMode.Wrap;
+                text.verticalOverflow = VerticalWrapMode.Overflow;
+                middle = !message.Contains("\n");
+            }
+            else
+            {
+                Debug.LogError($"unknown type {type}");
+            }
 
             var fixedPos = rect.localPosition;
             switch (align)
             {
                 case "left":
-                    text.alignment = TextAnchor.MiddleLeft;
+                    text.alignment =　middle ? TextAnchor.MiddleLeft : TextAnchor.UpperLeft;
                     rect.pivot = new Vector2(0.0f, 0.5f);
                     fixedPos.x -= sizeDelta.x / 2.0f;
                     break;
 
                 case "center":
-                    text.alignment = TextAnchor.MiddleCenter;
+                    text.alignment =　middle ? TextAnchor.MiddleCenter : TextAnchor.UpperCenter;
                     rect.pivot = new Vector2(0.5f, 0.5f);
                     break;
 
                 case "right":
-                    text.alignment = TextAnchor.MiddleRight;
+                    text.alignment =　middle ? TextAnchor.MiddleRight : TextAnchor.UpperRight;
                     rect.pivot = new Vector2(1.0f, 0.5f);
                     fixedPos.x += sizeDelta.x / 2.0f;
                     break;

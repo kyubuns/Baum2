@@ -9,7 +9,7 @@
       this.runOneFile = bind(this.runOneFile, this);
     }
 
-    Baum.version = '0.4.0';
+    Baum.version = '0.5.0';
 
     Baum.maxLength = 1334;
 
@@ -380,15 +380,17 @@
     };
 
     PsdToJson.prototype.layerToHash = function(document, name, opt, layer) {
-      var align, bounds, e, hash, hh, originalText, pos, text, textCenterOffset, textColor, textSize, vh, vx, vy, ww;
+      var align, bounds, e, hash, hh, originalText, pos, text, textCenterOffset, textColor, textSize, textType, vh, vx, vy, ww;
       document.activeLayer = layer;
       hash = {};
       if (layer.kind === LayerKind.TEXT) {
         text = layer.textItem;
         textSize = parseFloat(this.getTextSize());
+        textType = 'paragraph';
         if (text.kind !== TextType.PARAGRAPHTEXT) {
           text.kind = TextType.PARAGRAPHTEXT;
           text.height = textSize * 2;
+          textType = 'point';
           textCenterOffset = text.size.value;
           pos = [text.position[0].value, text.position[1].value];
           pos[1] = pos[1] - textCenterOffset / 2;
@@ -415,6 +417,7 @@
         hash = {
           type: 'Text',
           text: originalText,
+          textType: textType,
           font: text.font,
           size: textSize,
           color: textColor,

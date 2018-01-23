@@ -1,7 +1,7 @@
 `#include "lib/json2.min.js"`
 
 class Baum
-  @version = '0.4.0'
+  @version = '0.5.0'
   @maxLength = 1334
 
   run: ->
@@ -285,10 +285,12 @@ class PsdToJson
     if layer.kind == LayerKind.TEXT
       text = layer.textItem
       textSize = parseFloat(@getTextSize())
+      textType = 'paragraph'
 
       if text.kind != TextType.PARAGRAPHTEXT
         text.kind = TextType.PARAGRAPHTEXT
         text.height = textSize * 2
+        textType = 'point'
 
         textCenterOffset = text.size.value
         pos = [text.position[0].value, text.position[1].value]
@@ -318,6 +320,7 @@ class PsdToJson
       hash = {
         type: 'Text'
         text: originalText
+        textType: textType
         font: text.font
         size: textSize
         color: textColor
