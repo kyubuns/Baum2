@@ -380,17 +380,29 @@
     };
 
     PsdToJson.prototype.layerToHash = function(document, name, opt, layer) {
-      var align, e, hash, originalText, text, textColor, vh, vx, vy, ww;
+      var align, bounds, e, hash, hh, originalText, pos, text, textCenterOffset, textColor, textSize, vh, vx, vy, ww;
       document.activeLayer = layer;
       hash = {};
       if (layer.kind === LayerKind.TEXT) {
         text = layer.textItem;
-        vx = layer.bounds[0].value;
-        ww = layer.bounds[2].value - layer.bounds[0].value;
-        vh = layer.bounds[3].value - layer.bounds[1].value;
+        textSize = parseFloat(this.getTextSize());
+        if (text.kind !== TextType.PARAGRAPHTEXT) {
+          text.kind = TextType.PARAGRAPHTEXT;
+          text.height = textSize * 2;
+          textCenterOffset = text.size.value;
+          pos = [text.position[0].value, text.position[1].value];
+          pos[1] = pos[1] - textCenterOffset / 2;
+          text.position = pos;
+        }
         originalText = text.contents.replace(/\r\n/g, '__CRLF__').replace(/\r/g, '__CRLF__').replace(/\n/g, '__CRLF__').replace(/__CRLF__/g, '\r\n');
-        text.contents = "-";
-        vy = layer.bounds[1].value - (layer.bounds[3].value - layer.bounds[1].value) / 2.0;
+        text.contents = "AE";
+        bounds = Util.getTextExtents(text);
+        vx = bounds.x;
+        vy = bounds.y;
+        ww = bounds.width;
+        hh = bounds.height;
+        vh = bounds.height;
+        text.contents = textSize;
         align = '';
         textColor = 0x000000;
         try {
@@ -404,14 +416,14 @@
           type: 'Text',
           text: originalText,
           font: text.font,
-          size: parseFloat(this.getTextSize()),
+          size: textSize,
           color: textColor,
           align: align,
-          x: vx,
-          y: vy,
-          w: ww,
-          h: layer.bounds[3].value - layer.bounds[1].value,
-          vh: vh,
+          x: Math.round(vx * 100.0) / 100.0,
+          y: Math.round(vy * 100.0) / 100.0,
+          w: Math.round(ww * 100.0) / 100.0,
+          h: Math.round(hh * 100.0) / 100.0,
+          vh: Math.round(vh * 100.0) / 100.0,
           opacity: Math.round(layer.opacity * 10.0) / 10.0
         };
         if (Util.hasStroke(document, layer)) {
@@ -813,6 +825,30 @@
       ref01.putEnumerated(charIDToTypeID('Lyr '), charIDToTypeID('Ordn'), charIDToTypeID('Trgt'));
       desc01.putReference(charIDToTypeID('null'), ref01);
       return executeAction(stringIDToTypeID('selectNoLayers'), desc01, DialogModes.NO);
+    };
+
+    Util.getTextExtents = function(text_item) {
+      var bounds, desc, height, ref, transform, width, x_scale, y_scale;
+      app.activeDocument.activeLayer = text_item.parent;
+      ref = new ActionReference();
+      ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+      desc = executeActionGet(ref).getObjectValue(stringIDToTypeID('textKey'));
+      bounds = desc.getObjectValue(stringIDToTypeID('bounds'));
+      width = bounds.getUnitDoubleValue(stringIDToTypeID('right'));
+      height = bounds.getUnitDoubleValue(stringIDToTypeID('bottom'));
+      x_scale = 1;
+      y_scale = 1;
+      if (desc.hasKey(stringIDToTypeID('transform'))) {
+        transform = desc.getObjectValue(stringIDToTypeID('transform'));
+        x_scale = transform.getUnitDoubleValue(stringIDToTypeID('xx'));
+        y_scale = transform.getUnitDoubleValue(stringIDToTypeID('yy'));
+      }
+      return {
+        x: Math.round(text_item.position[0]),
+        y: Math.round(text_item.position[1]),
+        width: Math.round(width * x_scale),
+        height: Math.round(height * y_scale)
+      };
     };
 
     return Util;
