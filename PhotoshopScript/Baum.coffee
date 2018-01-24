@@ -286,19 +286,20 @@ class PsdToJson
       text = layer.textItem
       textSize = parseFloat(@getTextSize())
       textType = 'paragraph'
+      scale = Util.getTextYScale(text) / 0.9
 
       if text.kind != TextType.PARAGRAPHTEXT
         text.kind = TextType.PARAGRAPHTEXT
-        text.height = textSize * 2
         textType = 'point'
 
+        text.height = textSize * (2.0 / scale)
         textCenterOffset = text.size.value
         pos = [text.position[0].value, text.position[1].value]
-        pos[1] = pos[1] - textCenterOffset / 2
+        pos[1] = pos[1] - (textCenterOffset / (2.0 / scale))
         text.position = pos
 
       originalText = text.contents.replace(/\r\n/g, '__CRLF__').replace(/\r/g, '__CRLF__').replace(/\n/g, '__CRLF__').replace(/__CRLF__/g, '\r\n')
-      text.contents = "AE"
+      text.contents = "Z"
 
       bounds = Util.getTextExtents(text)
       vx = bounds.x
@@ -306,8 +307,6 @@ class PsdToJson
       ww = bounds.width
       hh = bounds.height
       vh = bounds.height
-
-      text.contents = textSize
 
       align = ''
       textColor = 0x000000
@@ -636,6 +635,22 @@ class Util
       x_scale = transform.getUnitDoubleValue (stringIDToTypeID('xx'))
       y_scale = transform.getUnitDoubleValue (stringIDToTypeID('yy'))
     return { x:Math.round(text_item.position[0]), y:Math.round(text_item.position[1]) , width:Math.round(width*x_scale), height:Math.round(height*y_scale) }
+
+  @getTextYScale: (text_item) ->
+    app.activeDocument.activeLayer = text_item.parent
+    ref = new ActionReference()
+    ref.putEnumerated( charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt") )
+    desc = executeActionGet(ref).getObjectValue(stringIDToTypeID('textKey'))
+    bounds = desc.getObjectValue(stringIDToTypeID('bounds'))
+    width = bounds.getUnitDoubleValue (stringIDToTypeID('right'))
+    height = bounds.getUnitDoubleValue (stringIDToTypeID('bottom'))
+    x_scale = 1
+    y_scale = 1
+    if desc.hasKey(stringIDToTypeID('transform'))
+      transform = desc.getObjectValue(stringIDToTypeID('transform'))
+      x_scale = transform.getUnitDoubleValue (stringIDToTypeID('xx'))
+      y_scale = transform.getUnitDoubleValue (stringIDToTypeID('yy'))
+    return y_scale
 
 
 String.prototype.startsWith = (str) ->
