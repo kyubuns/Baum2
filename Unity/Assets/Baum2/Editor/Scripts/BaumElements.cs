@@ -69,7 +69,7 @@ namespace Baum2.Editor
             var rect = go.GetComponent<RectTransform>();
             var area = CalcArea();
             rect.sizeDelta = area.Size;
-            rect.localPosition = renderer.CalcPosition(area.Min, area.Size);
+            rect.anchoredPosition = renderer.CalcPosition(area.Min, area.Size);
 
             SetMaskImage(renderer, go);
             return go;
@@ -163,7 +163,7 @@ namespace Baum2.Editor
             var rect = go.GetComponent<RectTransform>();
             var area = CalcArea();
             rect.sizeDelta = area.Size;
-            rect.localPosition = Vector2.zero;
+            rect.anchoredPosition = Vector2.zero;
 
             SetMaskImage(renderer, go);
             return go;
@@ -193,7 +193,7 @@ namespace Baum2.Editor
             var go = PrefabCreator.CreateUIGameObject(Name);
 
             var rect = go.GetComponent<RectTransform>();
-            rect.localPosition = renderer.CalcPosition(canvasPosition, sizeDelta);
+            rect.anchoredPosition = renderer.CalcPosition(canvasPosition, sizeDelta);
             rect.sizeDelta = sizeDelta;
 
             var image = go.AddComponent<Image>();
@@ -264,7 +264,7 @@ namespace Baum2.Editor
             var go = PrefabCreator.CreateUIGameObject(Name);
 
             var rect = go.GetComponent<RectTransform>();
-            rect.localPosition = renderer.CalcPosition(canvasPosition, sizeDelta);
+            rect.anchoredPosition = renderer.CalcPosition(canvasPosition, sizeDelta);
             rect.sizeDelta = sizeDelta;
 
             var raw = go.AddComponent<RawData>();
@@ -292,10 +292,10 @@ namespace Baum2.Editor
             }
             else
             {
-                Debug.LogErrorFormat("unknown type {0}", type);
+                Debug.LogError($"unknown type {type}");
             }
 
-            var fixedPos = rect.localPosition;
+            var fixedPos = rect.anchoredPosition;
             switch (align)
             {
                 case "left":
@@ -315,7 +315,7 @@ namespace Baum2.Editor
                     fixedPos.x += sizeDelta.x / 2.0f;
                     break;
             }
-            rect.localPosition = fixedPos;
+            rect.anchoredPosition = fixedPos;
 
             var d = rect.sizeDelta;
             d.y = virtualHeight;
@@ -541,7 +541,7 @@ namespace Baum2.Editor
             var handleImage = handleRect == null ? null : handleRect.GetComponent<Image>();
             if (handleImage != null)
             {
-                handleRect.localPosition = Vector2.zero;
+                handleRect.anchoredPosition = Vector2.zero;
                 handleRect.anchorMin = new Vector2(0.0f, 0.0f);
                 handleRect.anchorMax = new Vector2(1.0f, 0.0f);
 
