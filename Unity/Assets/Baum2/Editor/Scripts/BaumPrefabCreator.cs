@@ -25,6 +25,11 @@ namespace Baum2.Editor
 
         public GameObject Create()
         {
+            if (EditorApplication.isPlaying)
+            {
+                EditorApplication.isPlaying = false;
+            }
+
             var text = AssetDatabase.LoadAssetAtPath<TextAsset>(assetPath).text;
             var json = MiniJSON.Json.Deserialize(text) as Dictionary<string, object>;
             var info = json.GetDic("info");
