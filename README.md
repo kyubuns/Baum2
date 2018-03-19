@@ -1,20 +1,21 @@
 baum2
 =====
 
-## 画像付きの紹介記事
-
-http://qiita.com/kyubuns/items/b4c0c92e60754a8dc544
-
-## 初期設定
+## Setup
 
 ### Photoshop
 
-* Baum2/PhotoshopScript/Baum.jsをPhotoshopのPluginsディレクトリ以下にコピーしてください。
+* Download [Baum.js](https://raw.githubusercontent.com/kyubuns/Baum2/master/PhotoshopScript/Baum.js) & [json2.min.js](https://raw.githubusercontent.com/kyubuns/Baum2/master/PhotoshopScript/lib/json2.min.js)
+* Copy to Photoshop/Plugins directory Baum.js & **lib/** json2.min.js
+    - Mac OS: Applications\Adobe Photoshop [Photoshop_version]\Presets\Scripts
+    - Windows 32 bit: Program Files (x86)\Adobe\Adobe Photoshop [Photoshop_version]\Presets\Scripts
+    - Windows 64 bit: Program Files\Adobe\Adobe Photoshop [Photoshop_version](64 Bit)\Presets\Scripts
+
+![lib 2018-03-19 13-16-04](https://user-images.githubusercontent.com/961165/37577816-ca588980-2b77-11e8-991b-91346d33c507.png)
 
 ### Unity
 
-* baum2.unitypackageを展開してください。
-    * 展開後、Baum2ディレクトリはどこに移動させても構いません。
+* Download & Import [baum2.unitypackage](https://github.com/kyubuns/Baum2/blob/master/Baum2.unitypackage?raw=true)
 * Baum2/Sample以下を参考に、好きなディレクトリに「BaumSprites」「BaumPrefabs」「BaumFonts」という空のファイルを作ってください。
     * BaumSprites: psdから生成されたSpriteを保存するディレクトリになります。
     * BaumPrefabs: psdから生成されたPrefabを保存するディレクトリになります。
@@ -83,7 +84,7 @@ UIの一部をアニメーションさせたい場合などは、Photoshop上の
 
 レイヤー名の先頭に#をつけることで、出力されないレイヤーを作ることが出来ます。
 
-## 動作確認環境
+## Developed by
 
 * Unity: Unity2017
-* PhotoshopScript: Adobe Photoshop CC 2017
+* PhotoshopScript: Adobe Photoshop CC 2018
