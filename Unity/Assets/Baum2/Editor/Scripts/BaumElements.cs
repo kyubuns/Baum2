@@ -292,7 +292,7 @@ namespace Baum2.Editor
             }
             else
             {
-                Debug.LogError($"unknown type {type}");
+                Debug.LogError("unknown type " + type);
             }
 
             var fixedPos = rect.anchoredPosition;
