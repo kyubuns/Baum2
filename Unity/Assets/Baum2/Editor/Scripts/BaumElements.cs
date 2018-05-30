@@ -460,13 +460,13 @@ namespace Baum2.Editor
                 layout.minWidth = item.CalcArea().Width;
                 if (scroll == "Vertical")
                 {
-                    rect.sizeDelta = new Vector2(rect.anchoredPosition.x * 2.0f, rect.sizeDelta.y);
-                    layout.minHeight = rect.anchoredPosition.x * 2.0f;
+                    rect.sizeDelta = new Vector2(Mathf.Abs(rect.anchoredPosition.x * 2.0f), Mathf.Abs(rect.sizeDelta.y));
+                    layout.minHeight = Mathf.Abs(rect.anchoredPosition.x * 2.0f);
                 }
                 if (scroll == "Horizontal")
                 {
-                    rect.sizeDelta = new Vector2(rect.sizeDelta.x, rect.anchoredPosition.y * 2.0f);
-                    layout.minWidth = rect.anchoredPosition.y * 2.0f;
+                    rect.sizeDelta = new Vector2(Mathf.Abs(rect.sizeDelta.x), Mathf.Abs(rect.anchoredPosition.y * 2.0f));
+                    layout.minWidth = Mathf.Abs(rect.anchoredPosition.y * 2.0f);
                 }
 
                 itemObject.SetActive(false);
