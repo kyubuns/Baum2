@@ -456,17 +456,15 @@ namespace Baum2.Editor
                 itemObject.transform.position = globalPosition;
 
                 var layout = itemObject.AddComponent<LayoutElement>();
-                layout.minHeight = item.CalcArea().Height;
                 layout.minWidth = item.CalcArea().Width;
+                layout.minHeight = item.CalcArea().Height;
                 if (scroll == "Vertical")
                 {
                     rect.sizeDelta = new Vector2(Mathf.Abs(rect.anchoredPosition.x * 2.0f), Mathf.Abs(rect.sizeDelta.y));
-                    layout.minHeight = Mathf.Abs(rect.anchoredPosition.x * 2.0f);
                 }
                 if (scroll == "Horizontal")
                 {
                     rect.sizeDelta = new Vector2(Mathf.Abs(rect.sizeDelta.x), Mathf.Abs(rect.anchoredPosition.y * 2.0f));
-                    layout.minWidth = Mathf.Abs(rect.anchoredPosition.y * 2.0f);
                 }
 
                 itemObject.SetActive(false);
