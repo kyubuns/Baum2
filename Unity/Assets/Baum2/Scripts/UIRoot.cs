@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using Home.View.UI.Component;
+using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.UI;
 
 namespace Baum2
 {

@@ -23,7 +23,17 @@ namespace OnionRing
             height = refTexture.height;
 
             pixels = new int[getPixels.Length];
-            for (var i = 0; i < getPixels.Length; ++i) pixels[i] = getPixels[i].a > 0 ? getPixels[i].GetHashCode() : 0;
+            for (var i = 0; i < getPixels.Length; ++i) pixels[i] = ToHashCode(getPixels[i]);
+        }
+
+        private int ToHashCode(Color color)
+        {
+            if ((int) (color.a * 255) == 0) return 0;
+
+            const int a = 256 / 4;
+            if (color.a > 0.95f) color.a = 1.0f;
+            if (color.a < 0.05f) color.a = 0.0f;
+            return (int)(color.a * a) * 255 * 255 * 255 + (int)(color.r * a) * 255 * 255 + (int)(color.g * a) * 255 + (int)(color.b * a);
         }
 
         private static void CalcLine(ulong[] list, out int start, out int end)

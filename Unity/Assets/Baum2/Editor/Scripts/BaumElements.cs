@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -385,6 +386,19 @@ namespace Baum2.Editor
 
             var items = CreateItems(renderer, go);
             SetupList(go, items);
+
+            var itemMinWidth = items.Select(x => x.GetComponent<LayoutElement>().minWidth).Min();
+            var itemMinHeight = items.Select(x => x.GetComponent<LayoutElement>().minHeight).Min();
+            if (content.GetComponent<VerticalLayoutGroup>())
+            {
+                var layoutGroup = content.GetComponent<VerticalLayoutGroup>();
+                layoutGroup.padding.bottom = (int) (go.GetComponent<RectTransform>().sizeDelta.y - itemMinHeight);
+            }
+            else
+            {
+                var layoutGroup = content.GetComponent<HorizontalLayoutGroup>();
+                layoutGroup.padding.right = (int) (go.GetComponent<RectTransform>().sizeDelta.x - itemMinWidth);
+            }
 
             return go;
         }

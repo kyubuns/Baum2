@@ -238,13 +238,15 @@ namespace Baum2
 
             if (LayoutGroup is VerticalLayoutGroup)
             {
-                ScrollRect.horizontalNormalizedPosition = 1.0f;
-                ScrollRect.verticalNormalizedPosition = 1.0f;
+                var contentHeight = ContentRectTransform.sizeDelta.y;
+                var y = -contentHeight / 2.0f + RectTransform.sizeDelta.y / 2.0f;
+                ContentRectTransform.anchoredPosition = new Vector2(ContentRectTransform.anchoredPosition.x, y);
             }
             else if (LayoutGroup is HorizontalLayoutGroup)
             {
-                ScrollRect.horizontalNormalizedPosition = 0.0f;
-                ScrollRect.verticalNormalizedPosition = 1.0f;
+                var contentWidth = ContentRectTransform.sizeDelta.x;
+                var x = contentWidth / 2.0f - RectTransform.sizeDelta.x / 2.0f;
+                ContentRectTransform.anchoredPosition = new Vector2(x, ContentRectTransform.anchoredPosition.y);
             }
 
             if (OnSizeChanged != null) OnSizeChanged();
