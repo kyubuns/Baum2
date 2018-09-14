@@ -43,5 +43,17 @@ namespace Baum2
             cache.List.Clear();
             cache.CreateCache(transform);
         }
+
+        public static UIRoot CreateWithCache(GameObject go)
+        {
+            Assert.IsNull(go.GetComponent<UIRoot>());
+
+            var uiRoot = go.AddComponent<UIRoot>();
+            var cache = go.AddComponent<Baum2.Cache>();
+            cache.CreateCache(go.transform);
+            uiRoot.Awake();
+
+            return uiRoot;
+        }
     }
 }

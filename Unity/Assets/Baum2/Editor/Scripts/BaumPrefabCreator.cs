@@ -106,6 +106,7 @@ namespace Baum2.Editor
         public Font GetFont(string fontName)
         {
             var font = AssetDatabase.LoadAssetAtPath<Font>(Path.Combine(fontRootPath, fontName) + ".ttf");
+            if (font == null) font = AssetDatabase.LoadAssetAtPath<Font>(Path.Combine(fontRootPath, fontName) + ".otf");
             Assert.IsNotNull(font, string.Format("[Baum2] font \"{0}\" is not found", fontName));
             return font;
         }
