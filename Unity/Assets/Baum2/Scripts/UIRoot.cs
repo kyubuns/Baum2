@@ -1,5 +1,4 @@
-﻿using Home.View.UI.Component;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
 
