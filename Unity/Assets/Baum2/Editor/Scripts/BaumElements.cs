@@ -434,6 +434,7 @@ namespace Baum2.Editor
             dummyMaskImage.transform.SetParent(go.transform);
             dummyMaskImage.GetComponent<RectTransform>().CopyTo(go.GetComponent<RectTransform>());
             dummyMaskImage.GetComponent<RectTransform>().CopyTo(content.GetComponent<RectTransform>());
+            content.GetComponent<RectTransform>().localPosition = Vector3.zero;
             dummyMaskImage.GetComponent<Image>().CopyTo(maskImage);
             GameObject.DestroyImmediate(dummyMaskImage);
 
@@ -547,6 +548,7 @@ namespace Baum2.Editor
                 var image = element as ImageElement;
                 if (handleRect != null || image == null) return;
                 if (element.Name == "Handle") handleRect = g.GetComponent<RectTransform>();
+                g.GetComponent<Image>().raycastTarget = false;
             });
 
             var scrollbar = go.AddComponent<Scrollbar>();
