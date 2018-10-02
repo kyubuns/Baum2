@@ -26,13 +26,15 @@ class Baum
 
     copiedDoc = app.activeDocument.duplicate(app.activeDocument.name[..-5] + '.copy.psd')
     Util.deselectLayers()
-    @removeLayers(copiedDoc)
-    @resizePsd(copiedDoc)
+    @removeUnvisibleLayers(copiedDoc)
     @rasterizeAll(copiedDoc)
+    @unvisibleAll(copiedDoc)
+    @layerBlendAll(copiedDoc, copiedDoc)
+    @removeCommentoutLayers(copiedDoc) # blendの処理してから消す
+    @resizePsd(copiedDoc)
     @selectDocumentArea(copiedDoc)
     @ungroupArtboard(copiedDoc)
     @clipping(copiedDoc, copiedDoc)
-    @layerMaskToLayer(copiedDoc, copiedDoc)
     copiedDoc.selection.deselect()
     @psdToJson(copiedDoc)
     @psdToImage(copiedDoc)
@@ -93,7 +95,7 @@ class Baum
     doc.resizeImage(width, height, doc.resolution, ResampleMethod.NEARESTNEIGHBOR)
 
 
-  removeLayers: (root) ->
+  removeUnvisibleLayers: (root) ->
     removeLayers = []
 
     for layer in root.layers
@@ -105,12 +107,24 @@ class Baum
         removeLayers.push(layer)
         continue
 
+      if layer.typename == 'LayerSet'
+        @removeUnvisibleLayers(layer)
+
+    if removeLayers.length > 0
+      for i in [removeLayers.length-1..0]
+        removeLayers[i].remove()
+
+
+  removeCommentoutLayers: (root) ->
+    removeLayers = []
+
+    for layer in root.layers
       if layer.name.startsWith('#')
         removeLayers.push(layer)
         continue
 
       if layer.typename == 'LayerSet'
-        @removeLayers(layer)
+        @removeCommentoutLayers(layer)
 
     if removeLayers.length > 0
       for i in [removeLayers.length-1..0]
@@ -142,20 +156,10 @@ class Baum
     layer.rasterize(RasterizeType.ENTIRELAYER)
 
     # LayerStyle含めてラスタライズ
-    idrasterizeLayer = stringIDToTypeID("rasterizeLayer")
-    desc5 = new ActionDescriptor()
-    idnull = charIDToTypeID("null")
-    ref4 = new ActionReference()
-    idLyr = charIDToTypeID("Lyr ")
-    idOrdn = charIDToTypeID("Ordn")
-    idTrgt = charIDToTypeID("Trgt")
-    ref4.putEnumerated(idLyr,idOrdn,idTrgt)
-    desc5.putReference(idnull,ref4)
-    idWhat = charIDToTypeID("What")
-    idrasterizeItem = stringIDToTypeID("rasterizeItem")
-    idlayerStyle = stringIDToTypeID("layerStyle")
-    desc5.putEnumerated(idWhat,idrasterizeItem,idlayerStyle)
-    executeAction(idrasterizeLayer,desc5,DialogModes.NO)
+    Util.rasterizeLayerStyle(layer)
+
+    # LayerMask
+    Util.rasterizeLayerMask(layer)
 
     app.activeDocument.activeLayer = tmp
 
@@ -164,7 +168,6 @@ class Baum
       if layer.name.startsWith('Artboard') && layer.typename == 'LayerSet'
         @ungroup(layer)
 
-
   ungroup: (root) ->
     layers = for layer in root.layers
       layer
@@ -172,31 +175,43 @@ class Baum
       layers[i].moveBefore(root)
     root.remove()
 
-
-  layerMaskToLayer: (document, root) ->
+  unvisibleAll: (root) ->
     for layer in root.layers
-      continue if layer.typename != 'LayerSet'
-      if Util.hasLayerMask(document, layer)
-        # 新しいレイヤーを作る
-        newLayer = document.artLayers.add()
-        newLayer.name = "#{layer.name}_LayerMask@Mask"
-        newLayer.move(layer, ElementPlacement.PLACEATBEGINNING)
+      if layer.typename == 'LayerSet'
+        @unvisibleAll(layer)
+      else
+        layer.visible = false
 
-        # レイヤー範囲を選択
-        document.selection.deselect()
-        Util.selectLayerMask(document, layer)
+  layerBlendAll: (document, root) ->
+    if root.layers.length == 0
+      return
 
-        # 黒で塗りつぶし
+    for i in [root.layers.length-1..0]
+      layer = root.layers[i]
+      if layer.typename == 'LayerSet'
+        @layerBlendAll(document, layer)
+      else
+        layer.visible = true
+        continue if layer.blendMode != BlendMode.OVERLAY && layer.kind != LayerKind.HUESATURATION
+        document.activeLayer = layer
+        try
+          # LayerKind.HUESATURATIONは0pxなのでエラーになる
+          Util.selectTransparency()
+          document.selection.bounds
+          document.selection.copy(true)
+        catch
+          layer.copy(true)
+        document.paste()
+        newLayer = document.activeLayer
+        newLayer.name = layer.name
+        document.activeLayer = layer
+        Util.selectTransparency()
+        document.selection.invert()
         document.activeLayer = newLayer
-        black = new SolidColor()
-        black.rgb.red = 0
-        black.rgb.green = 0
-        black.rgb.blue = 0
-        document.selection.fill(black)
-
-        Util.deleteLayerMask(document, layer)
-      @layerMaskToLayer(document, layer)
-
+        try
+          document.selection.bounds
+          document.selection.cut()
+        layer.remove()
 
   psdToJson: (targetDocument) ->
     toJson = new PsdToJson()
@@ -409,6 +424,7 @@ class PsdToJson
 
 class PsdToImage
   baseFolder = null
+  fileNames = []
 
   run: (document, saveFolder, documentName) ->
     @baseFolder = Folder(saveFolder + "/" + documentName)
@@ -449,7 +465,11 @@ class PsdToImage
       doc.trim(TrimType.TRANSPARENT)
 
     layer.opacity = 100.0
-    saveFile = new File("#{@baseFolder.fsName}/#{Util.layerToImageName(layer)}.png")
+    fileName = Util.layerToImageName(layer)
+    if fileName in fileNames
+      alert("#{fileName}と同名のレイヤーが存在します。レイヤー名を変更してください。")
+    fileNames.push(fileName)
+    saveFile = new File("#{@baseFolder.fsName}/#{fileName}.png")
     options = new ExportOptionsSaveForWeb()
     options.format = SaveDocumentType.PNG
     options.PNG8 = false
@@ -467,9 +487,15 @@ class Util
     file.close()
 
   @layerToImageName: (layer) ->
-    return layer.name.replace('.copy.psd', '').replace('.psd', '') if layer instanceof Document
+    encodeURI(Util.layerToImageNameLoop(layer)).replace(/%/g, '')
+
+  @layerToImageNameLoop: (layer) ->
+    return "" if layer instanceof Document
     image = Util.layerToImageName(layer.parent)
-    image + "_" + layer.name.split("@")[0].replace('_', '').replace(' ', '-')
+    imageName = image
+    if imageName != ""
+      imageName = imageName + "_"
+    imageName + layer.name.split("@")[0].replace('_', '').replace(' ', '-').toLowerCase()
 
   @getLastSnapshotID: (doc) ->
     hsObj = doc.historyStates
@@ -491,78 +517,6 @@ class Util
 
   @revertToSnapshot: (doc, snapshotID) ->
     doc.activeHistoryState = doc.historyStates[snapshotID]
-
-  @hasLayerMask: (doc, layer) ->
-    doc.activeLayer = layer
-
-    hasLayerMask = false
-    try
-      ref = new ActionReference()
-      keyUserMaskEnabled = charIDToTypeID("UsrM")
-      ref.putProperty(charIDToTypeID("Prpr"), keyUserMaskEnabled)
-      ref.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"))
-      desc = executeActionGet(ref)
-      hasLayerMask = desc.hasKey(keyUserMaskEnabled)
-    catch e
-      hasLayerMask = false
-
-    hasLayerMask
-
-  @selectLayerMask: (doc, layer) ->
-    doc.activeLayer = layer
-
-    try
-      # Select Layer Mask
-      id759 = charIDToTypeID( "slct" )
-      desc153 = new ActionDescriptor()
-      id760 = charIDToTypeID( "null" )
-      ref92 = new ActionReference()
-      id761 = charIDToTypeID( "Chnl" )
-      id762 = charIDToTypeID( "Chnl" )
-      id763 = charIDToTypeID( "Msk " )
-      ref92.putEnumerated( id761, id762, id763 )
-      desc153.putReference( id760, ref92 )
-      id764 = charIDToTypeID( "MkVs" )
-      desc153.putBoolean( id764, false )
-      executeAction( id759, desc153, DialogModes.NO )
-
-      # Add Mask To Selection
-      idsetd = charIDToTypeID( "setd" )
-      desc299 = new ActionDescriptor()
-      idnull = charIDToTypeID( "null" )
-      ref117 = new ActionReference()
-      idChnl = charIDToTypeID( "Chnl" )
-      idfsel = charIDToTypeID( "fsel" )
-      ref117.putProperty( idChnl, idfsel )
-      desc299.putReference( idnull, ref117 )
-      idT = charIDToTypeID( "T   " )
-      ref118 = new ActionReference()
-      idChnl = charIDToTypeID( "Chnl" )
-      idOrdn = charIDToTypeID( "Ordn" )
-      idTrgt = charIDToTypeID( "Trgt" )
-      ref118.putEnumerated( idChnl, idOrdn, idTrgt )
-      desc299.putReference( idT, ref118 )
-      executeAction( idsetd, desc299, DialogModes.NO )
-
-    catch e
-      alert(e)
-
-
-  @deleteLayerMask: (doc, layer) ->
-    doc.activeLayer = layer
-
-    try
-      idDlt = charIDToTypeID("Dlt ")
-      desc6 = new ActionDescriptor()
-      idnull = charIDToTypeID("null")
-      ref5 = new ActionReference()
-      idChnl = charIDToTypeID("Chnl")
-      idOrdn = charIDToTypeID("Ordn")
-      idTrgt = charIDToTypeID("Trgt")
-      ref5.putEnumerated(idChnl, idOrdn, idTrgt)
-      desc6.putReference(idnull, ref5)
-      executeAction(idDlt, desc6, DialogModes.NO)
-    catch e
 
   @hasStroke: (doc, layer) ->
     doc.activeLayer = layer
@@ -620,6 +574,17 @@ class Util
     desc01.putReference( charIDToTypeID('null'), ref01 )
     executeAction( stringIDToTypeID('selectNoLayers'), desc01, DialogModes.NO )
 
+  @selectTransparency: ->
+    idChnl = charIDToTypeID( "Chnl" )
+    actionSelect = new ActionReference()
+    actionSelect.putProperty( idChnl, charIDToTypeID( "fsel" ) )
+    actionTransparent = new ActionReference()
+    actionTransparent.putEnumerated( idChnl, idChnl, charIDToTypeID( "Trsp" ) )
+    actionDesc = new ActionDescriptor()
+    actionDesc.putReference( charIDToTypeID( "null" ), actionSelect )
+    actionDesc.putReference( charIDToTypeID( "T   " ), actionTransparent )
+    executeAction( charIDToTypeID( "setd" ), actionDesc, DialogModes.NO )
+
   @getTextExtents: (text_item) ->
     app.activeDocument.activeLayer = text_item.parent
     ref = new ActionReference()
@@ -652,6 +617,148 @@ class Util
       y_scale = transform.getUnitDoubleValue (stringIDToTypeID('yy'))
     return y_scale
 
+  @rasterizeLayerStyle: (layer) ->
+    app.activeDocument.activeLayer = layer
+    idrasterizeLayer = stringIDToTypeID("rasterizeLayer")
+    desc5 = new ActionDescriptor()
+    idnull = charIDToTypeID("null")
+    ref4 = new ActionReference()
+    idLyr = charIDToTypeID("Lyr ")
+    idOrdn = charIDToTypeID("Ordn")
+    idTrgt = charIDToTypeID("Trgt")
+    ref4.putEnumerated(idLyr,idOrdn,idTrgt)
+    desc5.putReference(idnull,ref4)
+    idWhat = charIDToTypeID("What")
+    idrasterizeItem = stringIDToTypeID("rasterizeItem")
+    idlayerStyle = stringIDToTypeID("layerStyle")
+    desc5.putEnumerated(idWhat,idrasterizeItem,idlayerStyle)
+    executeAction(idrasterizeLayer,desc5,DialogModes.NO)
+
+  @rasterizeLayerMask: (layer) ->
+    app.activeDocument.activeLayer = layer
+    if Util.hasVectorMask()
+      Util.rasterizeLayer()
+      Util.selectVectorMask()
+      Util.rasterizeVectorMask()
+      Util.applyLayerMask()
+
+    if Util.hasLayerMask()
+      Util.rasterizeLayer()
+      Util.selectLayerMask()
+      Util.applyLayerMask()
+
+  @hasVectorMask: ->
+    hasVectorMask = false
+    try
+      ref = new ActionReference()
+      keyVectorMaskEnabled = app.stringIDToTypeID( 'vectorMask' )
+      keyKind = app.charIDToTypeID( 'Knd ' )
+      ref.putEnumerated( app.charIDToTypeID( 'Path' ), app.charIDToTypeID( 'Ordn' ), keyVectorMaskEnabled )
+      desc = executeActionGet( ref )
+      if desc.hasKey( keyKind )
+        kindValue = desc.getEnumerationValue( keyKind )
+        if (kindValue == keyVectorMaskEnabled)
+          hasVectorMask = true
+    catch e
+      hasVectorMask = false
+    return hasVectorMask
+
+  @hasLayerMask: ->
+    hasLayerMask = false
+    try
+      ref = new ActionReference()
+      keyUserMaskEnabled = app.charIDToTypeID( 'UsrM' )
+      ref.putProperty( app.charIDToTypeID( 'Prpr' ), keyUserMaskEnabled )
+      ref.putEnumerated( app.charIDToTypeID( 'Lyr ' ), app.charIDToTypeID( 'Ordn' ), app.charIDToTypeID( 'Trgt' ) )
+      desc = executeActionGet( ref )
+      if desc.hasKey( keyUserMaskEnabled )
+        hasLayerMask = true
+    catch e
+      hasLayerMask = false
+    return hasLayerMask
+
+  @rasterizeLayer: ->
+    try
+      id1242 = stringIDToTypeID( "rasterizeLayer" )
+      desc245 = new ActionDescriptor()
+      id1243 = charIDToTypeID( "null" )
+      ref184 = new ActionReference()
+      id1244 = charIDToTypeID( "Lyr " )
+      id1245 = charIDToTypeID( "Ordn" )
+      id1246 = charIDToTypeID( "Trgt" )
+      ref184.putEnumerated( id1244, id1245, id1246 )
+      desc245.putReference( id1243, ref184 )
+      executeAction( id1242, desc245, DialogModes.NO )
+    catch
+
+  @selectVectorMask: ->
+    try
+      id55 = charIDToTypeID( "slct" )
+      desc15 = new ActionDescriptor()
+      id56 = charIDToTypeID( "null" )
+      ref13 = new ActionReference()
+      id57 = charIDToTypeID( "Path" )
+      id58 = charIDToTypeID( "Path" )
+      id59 = stringIDToTypeID( "vectorMask" )
+      ref13.putEnumerated( id57, id58, id59 )
+      id60 = charIDToTypeID( "Lyr " )
+      id61 = charIDToTypeID( "Ordn" )
+      id62 = charIDToTypeID( "Trgt" )
+      ref13.putEnumerated( id60, id61, id62 )
+      desc15.putReference( id56, ref13 )
+      executeAction( id55, desc15, DialogModes.NO )
+    catch e
+
+  @selectLayerMask: ->
+    try
+      id759 = charIDToTypeID( "slct" )
+      desc153 = new ActionDescriptor()
+      id760 = charIDToTypeID( "null" )
+      ref92 = new ActionReference()
+      id761 = charIDToTypeID( "Chnl" )
+      id762 = charIDToTypeID( "Chnl" )
+      id763 = charIDToTypeID( "Msk " )
+      ref92.putEnumerated( id761, id762, id763 )
+      desc153.putReference( id760, ref92 )
+      id764 = charIDToTypeID( "MkVs" )
+      desc153.putBoolean( id764, false )
+      executeAction( id759, desc153, DialogModes.NO )
+    catch e
+
+  @rasterizeVectorMask: ->
+    try
+      id488 = stringIDToTypeID( "rasterizeLayer" )
+      desc44 = new ActionDescriptor()
+      id489 = charIDToTypeID( "null" )
+      ref29 = new ActionReference()
+      id490 = charIDToTypeID( "Lyr " )
+      id491 = charIDToTypeID( "Ordn" )
+      id492 = charIDToTypeID( "Trgt" )
+      ref29.putEnumerated( id490, id491, id492 )
+      desc44.putReference( id489, ref29 )
+      id493 = charIDToTypeID( "What" )
+      id494 = stringIDToTypeID( "rasterizeItem" )
+      id495 = stringIDToTypeID( "vectorMask" )
+      desc44.putEnumerated( id493, id494, id495 )
+      executeAction( id488, desc44, DialogModes.NO )
+    catch e
+
+  @applyLayerMask: ->
+    try
+      id765 = charIDToTypeID( "Dlt " )
+      desc154 = new ActionDescriptor()
+      id766 = charIDToTypeID( "null" )
+      ref93 = new ActionReference()
+      id767 = charIDToTypeID( "Chnl" )
+      id768 = charIDToTypeID( "Ordn" )
+      id769 = charIDToTypeID( "Trgt" )
+      ref93.putEnumerated( id767, id768, id769 )
+      desc154.putReference( id766, ref93 )
+      id770 = charIDToTypeID( "Aply" )
+      desc154.putBoolean( id770, true )
+      executeAction( id765, desc154, DialogModes.NO )
+    catch e
+
 
 String.prototype.startsWith = (str) ->
   return this.slice(0, str.length) == str
@@ -661,6 +768,7 @@ String.prototype.endsWith = (suffix) ->
 
 setup = ->
   preferences.rulerUnits = Units.PIXELS
+  preferences.typeUnits = TypeUnits.PIXELS
 
 setup()
 baum = new Baum()
