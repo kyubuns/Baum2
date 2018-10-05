@@ -109,6 +109,7 @@ namespace Baum2
             }
             set
             {
+                updateSize = true;
                 LayoutGroup.padding = value;
             }
         }
