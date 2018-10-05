@@ -40,6 +40,7 @@ namespace Baum2
         public GameObject Get(string path)
         {
             if (path[0] == '/') path = path.Substring(1);
+            if (path.StartsWith("./")) path = path.Replace("./", gameObject.name + "/");
             var elements = path.ToLower().Split(SplitChar);
             Array.Reverse(elements);
             Assert.AreNotEqual(elements.Length, 0, "Baum2.Cache.Get path.Length != 0");
