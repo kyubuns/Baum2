@@ -1,7 +1,7 @@
 `#include "lib/json2.min.js"`
 
 class Baum
-  @version = '0.5.0'
+  @version = '0.6.0'
   @maxLength = 1334
 
   run: ->
@@ -151,6 +151,8 @@ class Baum
   rasterize: (layer) ->
     tmp = app.activeDocument.activeLayer
     app.activeDocument.activeLayer = layer
+
+    layer.allLocked = false
 
     # 普通にラスタライズ
     layer.rasterize(RasterizeType.ENTIRELAYER)
@@ -415,6 +417,8 @@ class PsdToJson
     else if name.endsWith('Scrollbar')
       hash = { type: 'Scrollbar' }
       hash['scroll'] = opt['scroll'] if opt['scroll']
+    else if name.endsWith('Toggle')
+      hash = { type: 'Toggle' }
     else
       hash = { type: 'Group' }
     hash['pivot'] = opt['pivot'] if opt['pivot']

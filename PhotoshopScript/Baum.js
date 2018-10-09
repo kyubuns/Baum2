@@ -10,7 +10,7 @@
       this.runOneFile = bind(this.runOneFile, this);
     }
 
-    Baum.version = '0.5.0';
+    Baum.version = '0.6.0';
 
     Baum.maxLength = 1334;
 
@@ -208,6 +208,7 @@
       var tmp;
       tmp = app.activeDocument.activeLayer;
       app.activeDocument.activeLayer = layer;
+      layer.allLocked = false;
       layer.rasterize(RasterizeType.ENTIRELAYER);
       Util.rasterizeLayerStyle(layer);
       Util.rasterizeLayerMask(layer);
@@ -573,6 +574,10 @@
         if (opt['scroll']) {
           hash['scroll'] = opt['scroll'];
         }
+      } else if (name.endsWith('Toggle')) {
+        hash = {
+          type: 'Toggle'
+        };
       } else {
         hash = {
           type: 'Group'

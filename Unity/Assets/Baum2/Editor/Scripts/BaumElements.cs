@@ -11,15 +11,16 @@ namespace Baum2.Editor
     {
         public static readonly Dictionary<string, Func<Dictionary<string, object>, Element>> Generator = new Dictionary<string, Func<Dictionary<string, object>, Element>>()
         {
-            { "Root", (d) => new RootElement(d)},
-            { "Image", (d) => new ImageElement(d)},
-            { "Mask", (d) => new MaskElement(d)},
-            { "Group", (d) => new GroupElement(d)},
-            { "Text", (d) => new TextElement(d)},
-            { "Button", (d) => new ButtonElement(d)},
-            { "List", (d) => new ListElement(d)},
-            { "Slider", (d) => new SliderElement(d)},
-            { "Scrollbar", (d) => new ScrollbarElement(d)},
+            { "Root", (d) => new RootElement(d) },
+            { "Image", (d) => new ImageElement(d) },
+            { "Mask", (d) => new MaskElement(d) },
+            { "Group", (d) => new GroupElement(d) },
+            { "Text", (d) => new TextElement(d) },
+            { "Button", (d) => new ButtonElement(d) },
+            { "List", (d) => new ListElement(d) },
+            { "Slider", (d) => new SliderElement(d) },
+            { "Scrollbar", (d) => new ScrollbarElement(d) },
+            { "Toggle", (d) => new ToggleElement(d) },
         };
 
         public string Name;
@@ -553,6 +554,34 @@ namespace Baum2.Editor
 
                 handleRect.sizeDelta = Vector2.zero;
             }
+
+            return go;
+        }
+    }
+
+    public sealed class ToggleElement : GroupElement
+    {
+        public ToggleElement(Dictionary<string, object> json) : base(json)
+        {
+        }
+
+        public override GameObject Render(Renderer renderer)
+        {
+            var go = CreateSelf(renderer);
+
+            Graphic lastImage = null;
+            Graphic checkImage = null;
+            RenderChildren(renderer, go, (g, element) =>
+            {
+                var image = element as ImageElement;
+                if (image == null) return;
+                if (lastImage == null) lastImage = g.GetComponent<Image>();
+                if (element.Name.Contains("Check")) checkImage = g.GetComponent<Image>();
+            });
+
+            var toggle = go.AddComponent<Toggle>();
+            toggle.targetGraphic = lastImage;
+            toggle.graphic = checkImage;
 
             return go;
         }
