@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEditor;
+using UnityEngine.UI;
 
 namespace Baum2.Editor
 {
     public sealed class PrefabCreator
     {
-        private static readonly string[] Versions = { "0.5.0", "0.6.0" };
+        private static readonly string[] Versions = { "0.6.0", "0.6.1" };
         private readonly string spriteRootPath;
         private readonly string fontRootPath;
         private readonly string assetPath;
@@ -40,8 +41,10 @@ namespace Baum2.Editor
             var canvasSize = canvas.GetDic("size");
             var baseSize = canvas.GetDic("base");
             var renderer = new Renderer(spriteRootPath, fontRootPath, imageSize.GetVector2("w", "h"), canvasSize.GetVector2("w", "h"), baseSize.GetVector2("x", "y"));
-            var rootElement = Element.Generate(json.GetDic("root"));
+            var rootElement = ElementFactory.Generate(json.GetDic("root"), null);
             var root = rootElement.Render(renderer);
+            root.AddComponent<Canvas>();
+            root.AddComponent<GraphicRaycaster>();
             root.AddComponent<UIRoot>();
 
             Postprocess(root);
@@ -69,13 +72,6 @@ namespace Baum2.Editor
         {
             var version = info.Get("version");
             if (!Versions.Contains(version)) throw new Exception(string.Format("version {0} is not supported", version));
-        }
-
-        public static GameObject CreateUIGameObject(string name)
-        {
-            var go = new GameObject(name);
-            go.AddComponent<RectTransform>();
-            return go;
         }
     }
 
@@ -138,6 +134,7 @@ namespace Baum2.Editor
         public Vector2 Min { get; private set; }
         public Vector2 Max { get; private set; }
         public Vector2 Avg { get { return (Min + Max) / 2.0f; } }
+        public Vector2 Center { get { return (Min + Max) / 2.0f; } }
         public float Width { get { return Mathf.Abs(Max.x - Min.x); } }
         public float Height { get { return Mathf.Abs(Max.y - Min.y); } }
         public Vector2 Size { get { return new Vector2(Width, Height); } }

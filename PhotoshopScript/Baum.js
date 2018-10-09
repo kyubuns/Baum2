@@ -10,7 +10,7 @@
       this.runOneFile = bind(this.runOneFile, this);
     }
 
-    Baum.version = '0.6.0';
+    Baum.version = '0.6.1';
 
     Baum.maxLength = 1334;
 
@@ -182,7 +182,14 @@
       ref1 = root.layers;
       for (j = 0, len = ref1.length; j < len; j++) {
         layer = ref1[j];
-        if (layer.typename === 'LayerSet') {
+        if (layer.name.startsWith('*')) {
+          layer.name = layer.name.slice(1).strip();
+          if (layer.typename === 'LayerSet') {
+            Util.mergeGroup(layer);
+          } else {
+            this.rasterize(layer);
+          }
+        } else if (layer.typename === 'LayerSet') {
           this.rasterizeAll(layer);
         } else if (layer.typename === 'ArtLayer') {
           if (layer.kind !== LayerKind.TEXT) {
@@ -498,6 +505,15 @@
           hash['background'] = true;
         }
       }
+      if (opt['pivot']) {
+        hash['pivot'] = opt['pivot'];
+      }
+      if (opt['stretchx']) {
+        hash['stretchx'] = opt['stretchx'];
+      }
+      if (opt['stretchy']) {
+        hash['stretchy'] = opt['stretchy'];
+      }
       return hash;
     };
 
@@ -585,6 +601,12 @@
       }
       if (opt['pivot']) {
         hash['pivot'] = opt['pivot'];
+      }
+      if (opt['stretchx']) {
+        hash['stretchx'] = opt['stretchx'];
+      }
+      if (opt['stretchy']) {
+        hash['stretchy'] = opt['stretchy'];
       }
       hash['elements'] = this.allLayers(document, layer);
       return hash;
@@ -1045,6 +1067,18 @@
       }
     };
 
+    Util.mergeGroup = function(layer) {
+      var desc15, e, idMrgtwo;
+      app.activeDocument.activeLayer = layer;
+      try {
+        idMrgtwo = charIDToTypeID("Mrg2");
+        desc15 = new ActionDescriptor();
+        return executeAction(idMrgtwo, desc15, DialogModes.NO);
+      } catch (error) {
+        e = error;
+      }
+    };
+
     return Util;
 
   })();
@@ -1055,6 +1089,14 @@
 
   String.prototype.endsWith = function(suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
+  };
+
+  String.prototype.strip = function() {
+    if (String.prototype.trim != null) {
+      return this.trim();
+    } else {
+      return this.replace(/^\s+|\s+$/g, "");
+    }
   };
 
   setup = function() {

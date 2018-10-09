@@ -1,7 +1,7 @@
 `#include "lib/json2.min.js"`
 
 class Baum
-  @version = '0.6.0'
+  @version = '0.6.1'
   @maxLength = 1334
 
   run: ->
@@ -133,7 +133,13 @@ class Baum
 
   rasterizeAll: (root) ->
     for layer in root.layers
-      if layer.typename == 'LayerSet'
+      if layer.name.startsWith('*')
+        layer.name = layer.name[1..-1].strip()
+        if layer.typename == 'LayerSet'
+          Util.mergeGroup(layer)
+        else
+          @rasterize(layer)
+      else if layer.typename == 'LayerSet'
         @rasterizeAll(layer)
       else if layer.typename == 'ArtLayer'
         if layer.kind != LayerKind.TEXT
@@ -373,6 +379,9 @@ class PsdToJson
       }
       hash['prefab'] = opt['prefab'] if opt['prefab']
       hash['background'] = true if opt['background']
+    hash['pivot'] = opt['pivot'] if opt['pivot']
+    hash['stretchx'] = opt['stretchx'] if opt['stretchx']
+    hash['stretchy'] = opt['stretchy'] if opt['stretchy']
     hash
 
   angleFromMatrix: (yy, xy) ->
@@ -422,6 +431,8 @@ class PsdToJson
     else
       hash = { type: 'Group' }
     hash['pivot'] = opt['pivot'] if opt['pivot']
+    hash['stretchx'] = opt['stretchx'] if opt['stretchx']
+    hash['stretchy'] = opt['stretchy'] if opt['stretchy']
     hash['elements'] = @allLayers(document, layer)
     hash
 
@@ -763,12 +774,23 @@ class Util
       executeAction( id765, desc154, DialogModes.NO )
     catch e
 
+  @mergeGroup: (layer) ->
+    app.activeDocument.activeLayer = layer
+    try
+      idMrgtwo = charIDToTypeID( "Mrg2" )
+      desc15 = new ActionDescriptor()
+      executeAction( idMrgtwo, desc15, DialogModes.NO )
+    catch e
+
 
 String.prototype.startsWith = (str) ->
   return this.slice(0, str.length) == str
 
 String.prototype.endsWith = (suffix) ->
   return this.indexOf(suffix, this.length - suffix.length) != -1
+
+String.prototype.strip = ->
+  if String::trim? then @trim() else @replace /^\s+|\s+$/g, ""
 
 setup = ->
   preferences.rulerUnits = Units.PIXELS
