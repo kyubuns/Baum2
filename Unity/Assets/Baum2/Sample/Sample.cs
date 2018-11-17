@@ -58,7 +58,7 @@ namespace Baum2.Sample
             var list = ui.Get<List>("PiyoList");
             list.Scrollbar = ui.Get<Scrollbar>("PiyoScrollbar");
             list.LayoutGroup.Spacing = 10;
-            list.UISelector = index => index % 2 == 0 ? "Item1" : "Item2";
+            list.UISelector = (_) => "Item1";
             list.UIUpdater = (listUI, index) =>
             {
                 listUI.Get<Text>("ListItemText").text = string.Format("Piyo: {0}", index);
