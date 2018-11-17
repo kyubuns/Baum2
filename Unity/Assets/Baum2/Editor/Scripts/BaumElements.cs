@@ -47,8 +47,8 @@ namespace Baum2.Editor
             this.parent = parent;
             name = json.Get("name");
             if (json.ContainsKey("pivot")) pivot = json.Get("pivot");
-            if (json.ContainsKey("stretchxy") || json.ContainsKey("stretchx") || (parent?.stretchX ?? false)) stretchX = true;
-            if (json.ContainsKey("stretchxy") || json.ContainsKey("stretchy") || (parent?.stretchY ?? false)) stretchY = true;
+            if (json.ContainsKey("stretchxy") || json.ContainsKey("stretchx") || (parent != null ? parent.stretchX : false)) stretchX = true;
+            if (json.ContainsKey("stretchxy") || json.ContainsKey("stretchy") || (parent != null ? parent.stretchY : false)) stretchY = true;
         }
 
         protected GameObject CreateUIGameObject(Renderer renderer)
@@ -101,7 +101,7 @@ namespace Baum2.Editor
         {
             if (!stretchX && !stretchY) return;
 
-            var parentSize = parent?.CalcArea().Size ?? renderer.CanvasSize;
+            var parentSize = parent != null ? parent.CalcArea().Size : renderer.CanvasSize;
             var rect = root.GetComponent<RectTransform>();
             var pivotPosMin = new Vector2(0.5f, 0.5f);
             var pivotPosMax = new Vector2(0.5f, 0.5f);
