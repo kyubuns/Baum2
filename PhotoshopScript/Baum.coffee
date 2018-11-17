@@ -160,11 +160,12 @@ class Baum
 
     layer.allLocked = false
 
+    # LayerStyle含めてラスタライズ
+    if layer.blendMode != BlendMode.OVERLAY && layer.kind != LayerKind.HUESATURATION
+      Util.rasterizeLayerStyle(layer)
+
     # 普通にラスタライズ
     layer.rasterize(RasterizeType.ENTIRELAYER)
-
-    # LayerStyle含めてラスタライズ
-    Util.rasterizeLayerStyle(layer)
 
     # LayerMask
     Util.rasterizeLayerMask(layer)
@@ -298,8 +299,8 @@ class PsdToJson
     opt = {}
     for optText in text.split(",")
       elements = optText.split("=")
-      elements[1] = true if elements.length == 1
-      opt[elements[0].toLowerCase()] = elements[1]
+      elements[1] = 'true' if elements.length == 1
+      opt[elements[0].toLowerCase()] = elements[1].toLowerCase()
     return opt
 
   layerToHash: (document, name, opt, layer) ->
@@ -382,6 +383,7 @@ class PsdToJson
     hash['pivot'] = opt['pivot'] if opt['pivot']
     hash['stretchx'] = opt['stretchx'] if opt['stretchx']
     hash['stretchy'] = opt['stretchy'] if opt['stretchy']
+    hash['stretchxy'] = opt['stretchxy'] if opt['stretchxy']
     hash
 
   angleFromMatrix: (yy, xy) ->
@@ -433,6 +435,7 @@ class PsdToJson
     hash['pivot'] = opt['pivot'] if opt['pivot']
     hash['stretchx'] = opt['stretchx'] if opt['stretchx']
     hash['stretchy'] = opt['stretchy'] if opt['stretchy']
+    hash['stretchxy'] = opt['stretchxy'] if opt['stretchxy']
     hash['elements'] = @allLayers(document, layer)
     hash
 
