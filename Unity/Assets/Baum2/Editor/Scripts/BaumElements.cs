@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -45,15 +46,9 @@ namespace Baum2.Editor
         {
             this.parent = parent;
             name = json.Get("name");
-            if (json.ContainsKey("pivot"))
-            {
-                pivot = json.Get("pivot");
-            }
-            else
-            {
-                if (json.ContainsKey("stretchx") || (parent != null && parent.stretchX)) stretchX = true;
-                if (json.ContainsKey("stretchy") || (parent != null && parent.stretchY)) stretchY = true;
-            }
+            if (json.ContainsKey("pivot")) pivot = json.Get("pivot");
+            if (json.ContainsKey("stretchxy") || json.ContainsKey("stretchx") || (parent?.stretchX ?? false)) stretchX = true;
+            if (json.ContainsKey("stretchxy") || json.ContainsKey("stretchy") || (parent?.stretchY ?? false)) stretchY = true;
         }
 
         protected GameObject CreateUIGameObject(Renderer renderer)
@@ -68,34 +63,45 @@ namespace Baum2.Editor
             if (string.IsNullOrEmpty(pivot)) pivot = "none";
 
             var rect = root.GetComponent<RectTransform>();
-            var pivotPos = new Vector2(0.5f, 0.5f);
+            var pivotMin = rect.anchorMin;
+            var pivotMax = rect.anchorMax;
+            var sizeDelta = rect.sizeDelta;
 
-            if (pivot.Contains("Bottom") || pivot.Contains("bottom"))
+            if (pivot.Contains("bottom"))
             {
-                pivotPos.y = 0.0f;
+                pivotMin.y = 0.0f;
+                pivotMax.y = 0.0f;
+                sizeDelta.y = CalcArea().Height;
             }
-            else if (pivot.Contains("Top") || pivot.Contains("top"))
+            else if (pivot.Contains("top"))
             {
-                pivotPos.y = 1.0f;
+                pivotMin.y = 1.0f;
+                pivotMax.y = 1.0f;
+                sizeDelta.y = CalcArea().Height;
             }
-            if (pivot.Contains("Left") || pivot.Contains("left"))
+            if (pivot.Contains("left"))
             {
-                pivotPos.x = 0.0f;
+                pivotMin.x = 0.0f;
+                pivotMax.x = 0.0f;
+                sizeDelta.x = CalcArea().Width;
             }
-            else if (pivot.Contains("Right") || pivot.Contains("right"))
+            else if (pivot.Contains("right"))
             {
-                pivotPos.x = 1.0f;
+                pivotMin.x = 1.0f;
+                pivotMax.x = 1.0f;
+                sizeDelta.x = CalcArea().Width;
             }
 
-            rect.anchorMin = pivotPos;
-            rect.anchorMax = pivotPos;
+            rect.anchorMin = pivotMin;
+            rect.anchorMax = pivotMax;
+            rect.sizeDelta = sizeDelta;
         }
 
         protected void SetStretch(GameObject root, Renderer renderer)
         {
             if (!stretchX && !stretchY) return;
 
-            var parentSize = parent != null ? parent.CalcArea().Size : renderer.CanvasSize;
+            var parentSize = parent?.CalcArea().Size ?? renderer.CanvasSize;
             var rect = root.GetComponent<RectTransform>();
             var pivotPosMin = new Vector2(0.5f, 0.5f);
             var pivotPosMax = new Vector2(0.5f, 0.5f);
@@ -105,14 +111,14 @@ namespace Baum2.Editor
             {
                 pivotPosMin.x = 0.0f;
                 pivotPosMax.x = 1.0f;
-                sizeDelta.x = sizeDelta.x - parentSize.x;
+                sizeDelta.x = CalcArea().Width - parentSize.x;
             }
 
             if (stretchY)
             {
                 pivotPosMin.y = 0.0f;
                 pivotPosMax.y = 1.0f;
-                sizeDelta.y = sizeDelta.y - parentSize.y;
+                sizeDelta.y = CalcArea().Height - parentSize.y;
             }
 
             rect.anchorMin = pivotPosMin;
@@ -124,16 +130,27 @@ namespace Baum2.Editor
     public class GroupElement : Element
     {
         protected readonly List<Element> elements;
+        private Area areaCache;
 
-        public GroupElement(Dictionary<string, object> json, Element parent) : base(json, parent)
+        public GroupElement(Dictionary<string, object> json, Element parent, bool resetStretch = false) : base(json, parent)
         {
             elements = new List<Element>();
             var jsonElements = json.Get<List<object>>("elements");
             foreach (var jsonElement in jsonElements)
             {
+                var x = stretchX;
+                var y = stretchY;
+                if (resetStretch)
+                {
+                    stretchX = false;
+                    stretchY = false;
+                }
                 elements.Add(ElementFactory.Generate(jsonElement as Dictionary<string, object>, this));
+                stretchX = x;
+                stretchY = y;
             }
             elements.Reverse();
+            areaCache = CalcAreaInternal();
         }
 
         public override GameObject Render(Renderer renderer)
@@ -142,8 +159,8 @@ namespace Baum2.Editor
 
             RenderChildren(renderer, go);
 
-            SetPivot(go, renderer);
             SetStretch(go, renderer);
+            SetPivot(go, renderer);
             return go;
         }
 
@@ -192,11 +209,16 @@ namespace Baum2.Editor
             }
         }
 
-        public override Area CalcArea()
+        private Area CalcAreaInternal()
         {
             var area = Area.None();
             foreach (var element in elements) area.Merge(element.CalcArea());
             return area;
+        }
+
+        public override Area CalcArea()
+        {
+            return areaCache;
         }
     }
 
@@ -219,8 +241,8 @@ namespace Baum2.Editor
 
             SetMaskImage(renderer, go);
 
-            SetPivot(go, renderer);
             SetStretch(go, renderer);
+            SetPivot(go, renderer);
             return go;
         }
 
@@ -258,8 +280,8 @@ namespace Baum2.Editor
             image.type = Image.Type.Sliced;
             image.color = new Color(1.0f, 1.0f, 1.0f, opacity / 100.0f);
 
-            SetPivot(go, renderer);
             SetStretch(go, renderer);
+            SetPivot(go, renderer);
 
             return go;
         }
@@ -381,8 +403,8 @@ namespace Baum2.Editor
                 outline.useGraphicAlpha = false;
             }
 
-            SetPivot(go, renderer);
             SetStretch(go, renderer);
+            SetPivot(go, renderer);
             return go;
         }
 
@@ -414,8 +436,8 @@ namespace Baum2.Editor
                 button.targetGraphic = lastImage;
             }
 
-            SetPivot(go, renderer);
             SetStretch(go, renderer);
+            SetPivot(go, renderer);
             return go;
         }
     }
@@ -424,7 +446,7 @@ namespace Baum2.Editor
     {
         private string scroll;
 
-        public ListElement(Dictionary<string, object> json, Element parent) : base(json, parent)
+        public ListElement(Dictionary<string, object> json, Element parent) : base(json, parent, true)
         {
             if (json.ContainsKey("scroll")) scroll = json.Get("scroll");
         }
@@ -440,10 +462,10 @@ namespace Baum2.Editor
             SetMaskImage(renderer, go, content);
 
             var items = CreateItems(renderer, go);
-            SetupList(go, items);
+            SetupList(go, items, content);
 
-            SetPivot(go, renderer);
             SetStretch(go, renderer);
+            SetPivot(go, renderer);
             return go;
         }
 
@@ -452,21 +474,18 @@ namespace Baum2.Editor
             var scrollRect = go.AddComponent<ScrollRect>();
             scrollRect.content = content.GetComponent<RectTransform>();
 
-            if (scroll == "Vertical")
+            var layoutGroup = content.AddComponent<ListLayoutGroup>();
+            if (scroll == "vertical")
             {
-                var layoutGroup = content.AddComponent<VerticalLayoutGroup>();
                 scrollRect.vertical = true;
                 scrollRect.horizontal = false;
-                layoutGroup.childForceExpandWidth = true;
-                layoutGroup.childForceExpandHeight = false;
+                layoutGroup.Scroll = Scroll.Vertical;
             }
-            else if (scroll == "Horizontal")
+            else if (scroll == "horizontal")
             {
-                var layoutGroup = content.AddComponent<HorizontalLayoutGroup>();
                 scrollRect.vertical = false;
                 scrollRect.horizontal = true;
-                layoutGroup.childForceExpandWidth = false;
-                layoutGroup.childForceExpandHeight = true;
+                layoutGroup.Scroll = Scroll.Horizontal;
             }
         }
 
@@ -476,8 +495,7 @@ namespace Baum2.Editor
 
             var dummyMaskImage = CreateDummyMaskImage(renderer);
             dummyMaskImage.transform.SetParent(go.transform);
-            dummyMaskImage.GetComponent<RectTransform>().CopyTo(go.GetComponent<RectTransform>());
-            dummyMaskImage.GetComponent<RectTransform>().CopyTo(content.GetComponent<RectTransform>());
+            go.GetComponent<RectTransform>().CopyTo(content.GetComponent<RectTransform>());
             content.GetComponent<RectTransform>().localPosition = Vector3.zero;
             dummyMaskImage.GetComponent<Image>().CopyTo(maskImage);
             GameObject.DestroyImmediate(dummyMaskImage);
@@ -488,7 +506,7 @@ namespace Baum2.Editor
 
         private GameObject CreateDummyMaskImage(Renderer renderer)
         {
-            var maskElement = elements.Find(x => (x is ImageElement && name == "Area"));
+            var maskElement = elements.Find(x => (x is ImageElement && x.name == "Area"));
             if (maskElement == null) throw new Exception(string.Format("{0} Area not found", name));
             elements.Remove(maskElement);
 
@@ -506,24 +524,18 @@ namespace Baum2.Editor
                 if (item == null) throw new Exception(string.Format("{0}'s element {1} is not group", name, element.name));
 
                 var itemObject = item.Render(renderer);
-                itemObject.transform.SetParent(go.transform);
+                itemObject.transform.SetParent(go.transform, true);
 
-                var globalPosition = itemObject.transform.position;
                 var rect = itemObject.GetComponent<RectTransform>();
-                rect.anchorMin = new Vector2(0.0f, 1.0f);
-                rect.anchorMax = new Vector2(0.0f, 1.0f);
-                itemObject.transform.position = globalPosition;
-
-                var layout = itemObject.AddComponent<LayoutElement>();
-                layout.minWidth = item.CalcArea().Width;
-                layout.minHeight = item.CalcArea().Height;
-                if (scroll == "Vertical")
+                if (scroll == "vertical")
                 {
-                    rect.sizeDelta = new Vector2(Mathf.Abs(rect.anchoredPosition.x * 2.0f), Mathf.Abs(rect.sizeDelta.y));
+                    rect.anchorMin = new Vector2(0.5f, 1.0f);
+                    rect.anchorMax = new Vector2(0.5f, 1.0f);
                 }
-                if (scroll == "Horizontal")
+                else if (scroll == "horizontal")
                 {
-                    rect.sizeDelta = new Vector2(Mathf.Abs(rect.sizeDelta.x), Mathf.Abs(rect.anchoredPosition.y * 2.0f));
+                    rect.anchorMin = new Vector2(0.0f, 0.5f);
+                    rect.anchorMax = new Vector2(0.0f, 0.5f);
                 }
 
                 itemObject.SetActive(false);
@@ -533,10 +545,11 @@ namespace Baum2.Editor
             return items;
         }
 
-        private void SetupList(GameObject go, List<GameObject> itemSources)
+        private void SetupList(GameObject go, List<GameObject> itemSources, GameObject content)
         {
             var list = go.AddComponent<List>();
             list.ItemSources = itemSources;
+            list.LayoutGroup = content.GetComponent<ListLayoutGroup>();
         }
     }
 
@@ -555,6 +568,8 @@ namespace Baum2.Editor
             {
                 var image = element as ImageElement;
                 if (fillRect != null || image == null) return;
+
+                g.GetComponent<Image>().raycastTarget = false;
                 if (element.name == "Fill") fillRect = g.GetComponent<RectTransform>();
             });
 
@@ -572,8 +587,8 @@ namespace Baum2.Editor
                 slider.fillRect = fillRect;
             }
 
-            SetPivot(go, renderer);
             SetStretch(go, renderer);
+            SetPivot(go, renderer);
             return go;
         }
     }
@@ -613,8 +628,8 @@ namespace Baum2.Editor
                 handleRect.sizeDelta = Vector2.zero;
             }
 
-            SetPivot(go, renderer);
             SetStretch(go, renderer);
+            SetPivot(go, renderer);
             return go;
         }
     }
@@ -643,8 +658,8 @@ namespace Baum2.Editor
             toggle.targetGraphic = lastImage;
             toggle.graphic = checkImage;
 
-            SetPivot(go, renderer);
             SetStretch(go, renderer);
+            SetPivot(go, renderer);
             return go;
         }
     }
@@ -658,8 +673,8 @@ namespace Baum2.Editor
         public override GameObject Render(Renderer renderer)
         {
             var go = CreateUIGameObject(renderer);
-            SetPivot(go, renderer);
             SetStretch(go, renderer);
+            SetPivot(go, renderer);
             return go;
         }
 

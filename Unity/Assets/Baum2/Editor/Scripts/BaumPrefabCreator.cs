@@ -94,8 +94,9 @@ namespace Baum2.Editor
 
         public Sprite GetSprite(string spriteName)
         {
-            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(Path.Combine(spriteRootPath, spriteName) + ".png");
-            Assert.IsNotNull(sprite, string.Format("[Baum2] sprite \"{0}\" is not found", spriteName));
+            var fullPath = Path.Combine(spriteRootPath, spriteName) + ".png";
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(fullPath);
+            Assert.IsNotNull(sprite, string.Format("[Baum2] sprite \"{0}\" is not found fullPath:{1}", spriteName, fullPath));
             return sprite;
         }
 

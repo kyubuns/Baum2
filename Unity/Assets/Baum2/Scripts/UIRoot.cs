@@ -13,14 +13,19 @@ namespace Baum2
             cache = GetComponent<Cache>();
         }
 
-        public GameObject Get(string gameObjectName)
+        public GameObject Get(string gameObjectName, bool noError = false)
         {
             var go = cache.Get(gameObjectName);
-            Assert.IsNotNull(go, string.Format("[Baum2] \"{0}\" is not found", gameObjectName));
+            if (!noError) Assert.IsNotNull(go, string.Format("[Baum2] \"{0}\" is not found", gameObjectName));
             return go;
         }
 
-        public T Get<T>(string gameObjectName, bool noError = false) where T : Component
+        public T Get<T>(string gameObjectName) where T : Component
+        {
+            return Get<T>(gameObjectName, false);
+        }
+
+        public T Get<T>(string gameObjectName, bool noError) where T : Component
         {
             var go = cache.Get(gameObjectName);
             if (!noError) Assert.IsNotNull(go, string.Format("[Baum2] \"{0}\" is not found", gameObjectName));
@@ -48,7 +53,28 @@ namespace Baum2
             Assert.IsNull(go.GetComponent<UIRoot>());
 
             var uiRoot = go.AddComponent<UIRoot>();
-            var cache = go.AddComponent<Baum2.Cache>();
+            var cache = go.AddComponent<Cache>();
+            cache.CreateCache(go.transform);
+            uiRoot.Awake();
+
+            return uiRoot;
+        }
+
+        public static void SetupCache(GameObject go)
+        {
+            Assert.IsNull(go.GetComponent<UIRoot>());
+            var uiRoot = go.AddComponent<UIRoot>();
+            go.AddComponent<Cache>();
+            uiRoot.Awake();
+        }
+
+        public static UIRoot UpdateCache(GameObject go)
+        {
+            Assert.IsNotNull(go.GetComponent<UIRoot>());
+
+            var uiRoot = go.GetComponent<UIRoot>();
+            var cache = go.GetComponent<Cache>();
+            cache.ClearCache();
             cache.CreateCache(go.transform);
             uiRoot.Awake();
 

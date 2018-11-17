@@ -37,21 +37,26 @@ namespace Baum2
             route.RemoveAt(route.Count - 1);
         }
 
+        public void ClearCache()
+        {
+            List.Clear();
+        }
+
         public GameObject Get(string path)
         {
             if (path[0] == '/') path = path.Substring(1);
-            if (path.StartsWith("./")) path = path.Replace("./", gameObject.name + "/");
-            var elements = path.ToLower().Split(SplitChar);
+            if (path.StartsWith("./", StringComparison.Ordinal)) path = path.Replace("./", gameObject.name + "/");
+            var elements = path.Split(SplitChar);
             Array.Reverse(elements);
             Assert.AreNotEqual(elements.Length, 0, "Baum2.Cache.Get path.Length != 0");
 
-            var cand = List.FindAll(x => x.Name.ToLower() == elements[0]);
+            var cand = List.FindAll(x => x.Name.Equals(elements[0], StringComparison.OrdinalIgnoreCase));
             for (var i = cand.Count - 1; i >= 0; --i)
             {
                 var pass = true;
                 for (var j = 1; j < elements.Length; ++j)
                 {
-                    if (cand[i].Path.Length > j - 1 && cand[i].Path[j - 1].ToLower() == elements[j]) continue;
+                    if (cand[i].Path.Length > j - 1 && cand[i].Path[j - 1].Equals(elements[j], StringComparison.OrdinalIgnoreCase)) continue;
                     pass = false;
                     break;
                 }

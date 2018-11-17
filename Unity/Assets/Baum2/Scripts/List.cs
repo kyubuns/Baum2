@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+// ReSharper disable InconsistentNaming
 
 namespace Baum2
 {
@@ -11,7 +11,8 @@ namespace Baum2
         [SerializeField]
         public List<GameObject> ItemSources;
 
-        public Action OnSizeChanged;
+        [SerializeField]
+        public ListLayoutGroup LayoutGroup;
 
         private GameObject contentCache;
         public GameObject Content
@@ -57,60 +58,13 @@ namespace Baum2
             }
         }
 
-        private LayoutGroup layoutGroupCache;
-        public LayoutGroup LayoutGroup
-        {
-            get
-            {
-                if (layoutGroupCache != null) return layoutGroupCache;
-                layoutGroupCache = Content.GetComponent<LayoutGroup>();
-                return layoutGroupCache;
-            }
-        }
-
-        private Scrollbar scrollbar;
         public Scrollbar Scrollbar
         {
-            get
-            {
-                return scrollbar;
-            }
             set
             {
-                scrollbar = value;
-
-                if (LayoutGroup is HorizontalLayoutGroup) ScrollRect.horizontalScrollbar = scrollbar;
-                else if (LayoutGroup is VerticalLayoutGroup) ScrollRect.verticalScrollbar = scrollbar;
+                if (LayoutGroup.Scroll == Scroll.Horizontal) ScrollRect.horizontalScrollbar = value;
+                else if (LayoutGroup.Scroll == Scroll.Vertical) ScrollRect.verticalScrollbar = value;
                 else throw new ApplicationException("LayoutGroup not found");
-            }
-        }
-
-        public float Spacing
-        {
-            get
-            {
-                if (LayoutGroup is HorizontalLayoutGroup) return ((HorizontalLayoutGroup)LayoutGroup).spacing;
-                if (LayoutGroup is VerticalLayoutGroup) return ((VerticalLayoutGroup)LayoutGroup).spacing;
-                throw new ApplicationException("LayoutGroup not found");
-            }
-            set
-            {
-                if (LayoutGroup is HorizontalLayoutGroup) ((HorizontalLayoutGroup)LayoutGroup).spacing = value;
-                else if (LayoutGroup is VerticalLayoutGroup) ((VerticalLayoutGroup)LayoutGroup).spacing = value;
-                else throw new ApplicationException("LayoutGroup not found");
-            }
-        }
-
-        public RectOffset Padding
-        {
-            get
-            {
-                return LayoutGroup.padding;
-            }
-            set
-            {
-                updateSize = true;
-                LayoutGroup.padding = value;
             }
         }
 
@@ -118,7 +72,7 @@ namespace Baum2
         {
             get
             {
-                return items.Count;
+                return Items.Count;
             }
         }
 
@@ -136,8 +90,8 @@ namespace Baum2
             }
         }
 
-        private Action<UIRoot, int> uiFactory;
-        public Action<UIRoot, int> UIFactory
+        private Action<string, UIRoot> uiFactory;
+        public Action<string, UIRoot> UIFactory
         {
             get
             {
@@ -163,106 +117,57 @@ namespace Baum2
             }
         }
 
-        private int itemSize;
-        private bool updateSize;
-        private readonly List<UIRoot> items = new List<UIRoot>();
+        private readonly List<UIRoot> Items = new List<UIRoot>();
 
         private UIRoot AddItem(string sourceName)
         {
-            var item = Instantiate(ItemSources.Find(x => x.name == sourceName));
+            var original = ItemSources.Find(x => x.name == sourceName);
+            var item = Instantiate(original);
             item.transform.SetParent(Content.transform);
-            item.transform.localPosition = Vector3.zero;
+            item.transform.localPosition = original.transform.localPosition;
             item.transform.localScale = Vector3.one;
             item.SetActive(true);
-            updateSize = true;
 
             var uiRoot = item.AddComponent<UIRoot>();
             var cache = item.AddComponent<Cache>();
             cache.CreateCache(item.transform);
             uiRoot.Awake();
 
-            items.Add(uiRoot);
+            Items.Add(uiRoot);
+            LayoutGroup.RequestUpdate();
 
             return uiRoot;
         }
 
         public void Resize(int size)
         {
-            itemSize = size;
-
             foreach (Transform item in Content.transform)
             {
                 Destroy(item.gameObject);
             }
-            items.Clear();
+            Items.Clear();
 
             for (var i = 0; i < size; ++i)
             {
-                var item = AddItem(uiSelector(i));
-                if (uiFactory != null) uiFactory(item, i);
+                var sourceName = uiSelector(i);
+                var item = AddItem(sourceName);
+                if (uiFactory != null) uiFactory(sourceName, item);
                 if (uiUpdater != null) uiUpdater(item, i);
             }
         }
 
         public void UpdateItem(int index)
         {
-            if (uiUpdater != null) uiUpdater(items[index], index);
+            if (uiUpdater != null) uiUpdater(Items[index], index);
         }
 
         public void UpdateAll()
         {
-            for (var i = 0; i < items.Count; ++i)
+            if (uiUpdater == null) return;
+            for (var i = 0; i < Items.Count; ++i)
             {
-                if (uiUpdater != null) uiUpdater(items[i], i);
+                uiUpdater(Items[i], i);
             }
-        }
-
-        public void LateUpdate()
-        {
-            if (!updateSize) return;
-            updateSize = false;
-
-            // サイズ調整
-            var axis = 1;
-            if (LayoutGroup is VerticalLayoutGroup)
-            {
-                axis = 1;
-            }
-            else if (LayoutGroup is HorizontalLayoutGroup)
-            {
-                axis = 0;
-            }
-
-            var scrollSize = ContentRectTransform.sizeDelta;
-            scrollSize[axis] = Mathf.Max(CalcContentSize(axis), RectTransform.sizeDelta[axis]);
-            ContentRectTransform.sizeDelta = scrollSize;
-
-            if (LayoutGroup is VerticalLayoutGroup)
-            {
-                var contentHeight = ContentRectTransform.sizeDelta.y;
-                var y = -contentHeight / 2.0f + RectTransform.sizeDelta.y / 2.0f;
-                ContentRectTransform.anchoredPosition = new Vector2(ContentRectTransform.anchoredPosition.x, y);
-            }
-            else if (LayoutGroup is HorizontalLayoutGroup)
-            {
-                var contentWidth = ContentRectTransform.sizeDelta.x;
-                var x = contentWidth / 2.0f - RectTransform.sizeDelta.x / 2.0f;
-                ContentRectTransform.anchoredPosition = new Vector2(x, ContentRectTransform.anchoredPosition.y);
-            }
-
-            if (OnSizeChanged != null) OnSizeChanged();
-        }
-
-        private float CalcContentSize(int axis)
-        {
-            var result = Enumerable.Range(0, itemSize)
-                .Select(i => UISelector(i))
-                .Select(s => ItemSources.Find(x => x.name == s))
-                .Sum(x => x.GetComponent<RectTransform>().sizeDelta[axis]);
-            result += Spacing * (itemSize - 1);
-            if (axis == 1) result += Padding.top + Padding.bottom;
-            if (axis == 0) result += Padding.left + Padding.right;
-            return result;
         }
     }
 }
