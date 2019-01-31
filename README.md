@@ -24,11 +24,7 @@ baum2
 ### Unity
 
 * Download & Import [baum2.unitypackage](https://github.com/kyubuns/Baum2/blob/master/Baum2.unitypackage?raw=true)
-* Baum2/Sample以下を参考に、好きなディレクトリに「BaumSprites」「BaumPrefabs」「BaumFonts」という空のファイルを作ってください。
-    * BaumSprites: psdから生成されたSpriteを保存するディレクトリになります。
-    * BaumPrefabs: psdから生成されたPrefabを保存するディレクトリになります。
-    * BaumFonts: Prefabを作る際に使用するFontの参照先になります。
-* psd上で使用するFontは、BaumFontsファイルを置いたディレクトリに置いておいてください。
+* psd上で使用するFontは、BaumFontsファイルが置いてあるディレクトリに置いておいてください。
 
 ## 使い方
 
