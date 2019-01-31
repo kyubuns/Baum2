@@ -46,6 +46,7 @@
       this.unvisibleAll(copiedDoc);
       this.layerBlendAll(copiedDoc, copiedDoc);
       this.removeCommentoutLayers(copiedDoc);
+      this.cropLayers(copiedDoc);
       this.resizePsd(copiedDoc);
       this.selectDocumentArea(copiedDoc);
       this.ungroupArtboard(copiedDoc);
@@ -177,6 +178,12 @@
       }
     };
 
+    Baum.prototype.cropLayers = function(root) {
+      var bounds;
+      bounds = [0, 0, root.width, root.height];
+      return root.crop(bounds);
+    };
+
     Baum.prototype.rasterizeAll = function(root) {
       var j, layer, len, ref1, results, t;
       ref1 = root.layers;
@@ -216,7 +223,7 @@
       tmp = app.activeDocument.activeLayer;
       app.activeDocument.activeLayer = layer;
       layer.allLocked = false;
-      if (layer.blendMode !== BlendMode.OVERLAY && layer.kind !== LayerKind.HUESATURATION) {
+      if (layer.blendMode !== BlendMode.OVERLAY && layer.kind !== LayerKind.HUESATURATION && layer.opacity > 1) {
         Util.rasterizeLayerStyle(layer);
       }
       layer.rasterize(RasterizeType.ENTIRELAYER);

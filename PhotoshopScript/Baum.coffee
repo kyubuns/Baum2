@@ -31,6 +31,7 @@ class Baum
     @unvisibleAll(copiedDoc)
     @layerBlendAll(copiedDoc, copiedDoc)
     @removeCommentoutLayers(copiedDoc) # blendの処理してから消す
+    @cropLayers(copiedDoc)
     @resizePsd(copiedDoc)
     @selectDocumentArea(copiedDoc)
     @ungroupArtboard(copiedDoc)
@@ -131,6 +132,11 @@ class Baum
         removeLayers[i].remove()
 
 
+  cropLayers: (root) ->
+    bounds = [0,0,root.width,root.height];
+    root.crop(bounds)
+
+
   rasterizeAll: (root) ->
     for layer in root.layers
       if layer.name.startsWith('*')
@@ -161,7 +167,7 @@ class Baum
     layer.allLocked = false
 
     # LayerStyle含めてラスタライズ
-    if layer.blendMode != BlendMode.OVERLAY && layer.kind != LayerKind.HUESATURATION
+    if layer.blendMode != BlendMode.OVERLAY && layer.kind != LayerKind.HUESATURATION && layer.opacity > 1
       Util.rasterizeLayerStyle(layer)
 
     # 普通にラスタライズ
