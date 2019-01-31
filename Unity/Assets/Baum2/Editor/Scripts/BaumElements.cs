@@ -524,21 +524,22 @@ namespace Baum2.Editor
                 if (item == null) throw new Exception(string.Format("{0}'s element {1} is not group", name, element.name));
 
                 var itemObject = item.Render(renderer);
-                itemObject.transform.SetParent(go.transform, true);
+                itemObject.transform.SetParent(go.transform);
 
                 var rect = itemObject.GetComponent<RectTransform>();
+                var originalPosition = rect.anchoredPosition;
                 if (scroll == "vertical")
                 {
                     rect.anchorMin = new Vector2(0.5f, 1.0f);
                     rect.anchorMax = new Vector2(0.5f, 1.0f);
+                    rect.anchoredPosition = new Vector2(originalPosition.x, -rect.rect.height / 2f);
                 }
                 else if (scroll == "horizontal")
                 {
                     rect.anchorMin = new Vector2(0.0f, 0.5f);
                     rect.anchorMax = new Vector2(0.0f, 0.5f);
+                    rect.anchoredPosition = new Vector2(rect.rect.width / 2f, originalPosition.y);
                 }
-
-                itemObject.SetActive(false);
 
                 items.Add(itemObject);
             }

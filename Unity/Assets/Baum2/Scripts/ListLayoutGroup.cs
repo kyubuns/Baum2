@@ -8,6 +8,12 @@ namespace Baum2
         [SerializeField]
         public Scroll Scroll;
 
+        private void Start()
+        {
+            RectTransformParent = RectTransform.parent.GetComponent<RectTransform>();
+            Parent = transform.parent.GetComponent<RectTransform>();
+        }
+
         public RectOffset Padding;
         public float Spacing;
 
@@ -16,6 +22,9 @@ namespace Baum2
         private int SaveScrollToIndex = -1;
 
         private RectTransform rectTransformCache;
+        private RectTransform Parent;
+        private RectTransform RectTransformParent;
+
         public RectTransform RectTransform
         {
             get
@@ -70,10 +79,11 @@ namespace Baum2
             {
                 var childTransform = RectTransform.GetChild(i);
                 var child = childTransform as RectTransform;
-                if (!childTransform.gameObject.activeSelf || child == null) continue;
+                if (!childTransform.gameObject.activeSelf || !child) continue;
 
                 var a = child.anchoredPosition;
-                a[axis] = (size + (axis == 0 ? child.rect.width : child.rect.height) / 2.0f) * vector;
+                var rect = child.rect;
+                a[axis] = (size + (axis == 0 ? rect.width : rect.height) / 2.0f) * vector;
                 child.anchoredPosition = a;
                 size += child.sizeDelta[axis];
                 if (i != RectTransform.childCount - 1) size += Spacing;
@@ -81,7 +91,7 @@ namespace Baum2
             size += paddingEnd;
 
             var totalSize = RectTransform.sizeDelta;
-            var parentRect = RectTransform.parent.GetComponent<RectTransform>().rect;
+            var parentRect = RectTransformParent.rect;
             totalSize[axis] = Mathf.Max(size, axis == 0 ? parentRect.width : parentRect.height);
             RectTransform.sizeDelta = totalSize;
 
@@ -102,14 +112,14 @@ namespace Baum2
             if (Scroll == Scroll.Vertical)
             {
                 var contentHeight = RectTransform.sizeDelta.y;
-                var y = -contentHeight / 2.0f + transform.parent.GetComponent<RectTransform>().rect.height / 2.0f;
+                var y = -contentHeight / 2.0f + Parent.rect.height / 2.0f;
 
                 var size = 0.0f;
                 size += Padding.top;
                 for (var i = 0; i < index; ++i)
                 {
                     var child = RectTransform.GetChild(i) as RectTransform;
-                    if (child == null) continue;
+                    if (!child) continue;
 
                     size += child.sizeDelta.y;
                     size += Spacing;
@@ -120,23 +130,28 @@ namespace Baum2
             else if (Scroll == Scroll.Horizontal)
             {
                 var contentWidth = RectTransform.sizeDelta.x;
-                var x = contentWidth / 2.0f - transform.parent.GetComponent<RectTransform>().rect.width / 2.0f;
+                var x = contentWidth / 2.0f - Parent.rect.width / 2.0f;
                 RectTransform.anchoredPosition = new Vector2(x, RectTransform.anchoredPosition.y);
             }
         }
 
         public void ResetScroll()
         {
+            if (!Initialized)
+            {
+                // Initialized == falseのときは自動的にリセットされる
+                return;
+            }
             if (Scroll == Scroll.Vertical)
             {
                 var contentHeight = RectTransform.sizeDelta.y;
-                var y = -contentHeight / 2.0f + transform.parent.GetComponent<RectTransform>().rect.height / 2.0f;
+                var y = -contentHeight / 2.0f + Parent.rect.height / 2.0f;
                 RectTransform.anchoredPosition = new Vector2(RectTransform.anchoredPosition.x, y);
             }
             else if (Scroll == Scroll.Horizontal)
             {
                 var contentWidth = RectTransform.sizeDelta.x;
-                var x = contentWidth / 2.0f - transform.parent.GetComponent<RectTransform>().rect.width / 2.0f;
+                var x = contentWidth / 2.0f - Parent.rect.width / 2.0f;
                 RectTransform.anchoredPosition = new Vector2(x, RectTransform.anchoredPosition.y);
             }
         }

@@ -8,6 +8,11 @@ namespace Baum2
     {
         private Cache cache;
 
+        public Cache Raw
+        {
+            get { return cache; }
+        }
+
         public void Awake()
         {
             cache = GetComponent<Cache>();
@@ -33,6 +38,7 @@ namespace Baum2
 
             var t = GetComponent<T>(go);
             if (!noError) Assert.IsNotNull(t, string.Format("[Baum2] \"{0}<{1}>\" is not found", gameObjectName, typeof(T).Name));
+
             return t;
         }
 
@@ -40,12 +46,6 @@ namespace Baum2
         {
             if (go == null) return null;
             return go.GetComponent<T>();
-        }
-
-        public void Reload()
-        {
-            cache.List.Clear();
-            cache.CreateCache(transform);
         }
 
         public static UIRoot CreateWithCache(GameObject go)
@@ -79,6 +79,18 @@ namespace Baum2
             uiRoot.Awake();
 
             return uiRoot;
+        }
+
+        public void RecalculateBounds()
+        {
+            RecalculateBounds(new Vector2(0f, 0f));
+        }
+
+        public void RecalculateBounds(Vector2 margin)
+        {
+            var rootTransform = gameObject.GetComponent<RectTransform>();
+            var bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(rootTransform);
+            rootTransform.sizeDelta = new Vector2(rootTransform.sizeDelta.x + margin.x, bounds.size.y + margin.y);
         }
     }
 }

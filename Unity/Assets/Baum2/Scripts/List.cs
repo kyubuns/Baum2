@@ -119,11 +119,18 @@ namespace Baum2
 
         private readonly List<UIRoot> Items = new List<UIRoot>();
 
+        public void Awake()
+        {
+            foreach (var itemSource in ItemSources)
+            {
+                itemSource.SetActive(false);
+            }
+        }
+
         private UIRoot AddItem(string sourceName)
         {
             var original = ItemSources.Find(x => x.name == sourceName);
-            var item = Instantiate(original);
-            item.transform.SetParent(Content.transform);
+            var item = Instantiate(original, Content.transform, true);
             item.transform.localPosition = original.transform.localPosition;
             item.transform.localScale = Vector3.one;
             item.SetActive(true);
@@ -137,6 +144,11 @@ namespace Baum2
             LayoutGroup.RequestUpdate();
 
             return uiRoot;
+        }
+
+        public UIRoot AddItemDirect(string sourceName)
+        {
+            return AddItem(sourceName);
         }
 
         public void Resize(int size)
@@ -168,6 +180,18 @@ namespace Baum2
             {
                 uiUpdater(Items[i], i);
             }
+        }
+
+        public void ResetScroll()
+        {
+            ScrollRect.velocity = Vector2.zero;
+            LayoutGroup.ResetScroll();
+        }
+
+        public void ScrollTo(int index)
+        {
+            ScrollRect.velocity = Vector2.zero;
+            LayoutGroup.ScrollToIndex(index);
         }
     }
 }
