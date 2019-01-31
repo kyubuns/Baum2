@@ -6,7 +6,7 @@ namespace Baum2.Sample
     public class Sample : MonoBehaviour
     {
         [SerializeField]
-        private GameObject uiPrefab;
+        private GameObject uiPrefab = null;
 
         private UIRoot ui;
         private int listSize;
