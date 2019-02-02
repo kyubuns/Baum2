@@ -13,13 +13,11 @@ baum2
 
 ### Photoshop
 
-* Download [Baum.js](https://raw.githubusercontent.com/kyubuns/Baum2/master/PhotoshopScript/Baum.js) & [json2.min.js](https://raw.githubusercontent.com/kyubuns/Baum2/master/PhotoshopScript/lib/json2.min.js)
-* Copy to Photoshop/Plugins directory Baum.js & **lib/** json2.min.js
+* Download [Baum.js](https://github.com/kyubuns/Baum2/releases)
+* Copy to Photoshop/Plugins directory Baum.js
     - Mac OS: Applications\Adobe Photoshop [Photoshop_version]\Presets\Scripts
     - Windows 32 bit: Program Files (x86)\Adobe\Adobe Photoshop [Photoshop_version]\Presets\Scripts
     - Windows 64 bit: Program Files\Adobe\Adobe Photoshop [Photoshop_version](64 Bit)\Presets\Scripts
-
-![lib 2018-03-19 13-16-04](https://user-images.githubusercontent.com/961165/37577816-ca588980-2b77-11e8-991b-91346d33c507.png)
 
 ### Unity
 
