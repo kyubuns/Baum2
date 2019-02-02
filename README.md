@@ -24,7 +24,7 @@ baum2
 * Download & Import [baum2.unitypackage](https://github.com/kyubuns/Baum2/blob/master/Baum2.unitypackage?raw=true)
 * psd上で使用するFontは、BaumFontsファイルが置いてあるディレクトリに置いておいてください。
 
-## 使い方
+## 使い方 ([Video](https://youtu.be/2pIuC4MWT84))
 
 ### Photoshop上での操作
 
