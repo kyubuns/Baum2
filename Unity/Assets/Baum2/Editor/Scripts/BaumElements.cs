@@ -79,6 +79,12 @@ namespace Baum2.Editor
                 pivotMax.y = 1.0f;
                 sizeDelta.y = CalcArea().Height;
             }
+            else if (pivot.Contains("middle"))
+            {
+                pivotMin.y = 0.5f;
+                pivotMax.y = 0.5f;
+                sizeDelta.y = CalcArea().Height;
+            }
             if (pivot.Contains("left"))
             {
                 pivotMin.x = 0.0f;
@@ -89,6 +95,12 @@ namespace Baum2.Editor
             {
                 pivotMin.x = 1.0f;
                 pivotMax.x = 1.0f;
+                sizeDelta.x = CalcArea().Width;
+            }
+            else if (pivot.Contains("center"))
+            {
+                pivotMin.x = 0.5f;
+                pivotMax.x = 0.5f;
                 sizeDelta.x = CalcArea().Width;
             }
 
