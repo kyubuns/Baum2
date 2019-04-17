@@ -43,10 +43,11 @@
       copiedDoc = app.activeDocument.duplicate(app.activeDocument.name.slice(0, -4) + '.copy.psd');
       Util.deselectLayers();
       this.removeUnvisibleLayers(copiedDoc);
+      this.unlockAll(copiedDoc);
       this.rasterizeAll(copiedDoc);
       this.unvisibleAll(copiedDoc);
       this.layerBlendAll(copiedDoc, copiedDoc);
-      this.removeCommentoutLayers(copiedDoc);
+      this.removeCommentoutLayers(copiedDoc, copiedDoc);
       this.cropLayers(copiedDoc);
       this.resizePsd(copiedDoc);
       this.selectDocumentArea(copiedDoc);
@@ -73,6 +74,7 @@
 
     Baum.prototype.clipping = function(document, root) {
       var h, w, x1, x2, y1, y2;
+      document.resizeImage(document.width, document.height, 72, ResampleMethod.NEARESTNEIGHBOR);
       if (document.selection.bounds[0].value === 0 && document.selection.bounds[1].value === 0 && document.selection.bounds[2].value === document.width.value && document.selection.bounds[3].value === document.height.value) {
         return;
       }
@@ -136,8 +138,7 @@
       for (j = 0, len = ref1.length; j < len; j++) {
         layer = ref1[j];
         if (layer.visible === false) {
-          removeLayers.push(layer);
-          continue;
+          layer.visible = true;
         }
         if (layer.bounds[0].value === 0 && layer.bounds[1].value === 0 && layer.bounds[2].value === 0 && layer.bounds[3].value === 0) {
           removeLayers.push(layer);
@@ -156,7 +157,7 @@
       }
     };
 
-    Baum.prototype.removeCommentoutLayers = function(root) {
+    Baum.prototype.removeCommentoutLayers = function(document, root) {
       var i, j, k, layer, len, ref1, ref2, removeLayers, results;
       removeLayers = [];
       ref1 = root.layers;
@@ -167,8 +168,11 @@
           continue;
         }
         if (layer.typename === 'LayerSet') {
-          this.removeCommentoutLayers(layer);
+          this.removeCommentoutLayers(document, layer);
         }
+      }
+      if (root.typename === 'LayerSet') {
+        document.activeLayer = root;
       }
       if (removeLayers.length > 0) {
         results = [];
@@ -223,7 +227,6 @@
       var tmp;
       tmp = app.activeDocument.activeLayer;
       app.activeDocument.activeLayer = layer;
-      layer.allLocked = false;
       if (layer.blendMode !== BlendMode.OVERLAY && layer.kind !== LayerKind.HUESATURATION && layer.opacity > 1) {
         Util.rasterizeLayerStyle(layer);
       }
@@ -263,6 +266,25 @@
         layers[i].moveBefore(root);
       }
       return root.remove();
+    };
+
+    Baum.prototype.unlockAll = function(root) {
+      var j, layer, len, ref1, results;
+      ref1 = root.layers;
+      results = [];
+      for (j = 0, len = ref1.length; j < len; j++) {
+        layer = ref1[j];
+        if (layer.typename === 'LayerSet') {
+          results.push(this.unlockAll(layer));
+        } else {
+          if (layer.allLocked) {
+            results.push(layer.allLocked = false);
+          } else {
+            results.push(void 0);
+          }
+        }
+      }
+      return results;
     };
 
     Baum.prototype.unvisibleAll = function(root) {

@@ -25,10 +25,11 @@ class Baum
     copiedDoc = app.activeDocument.duplicate(app.activeDocument.name[..-5] + '.copy.psd')
     Util.deselectLayers()
     @removeUnvisibleLayers(copiedDoc)
+    @unlockAll(copiedDoc)
     @rasterizeAll(copiedDoc)
     @unvisibleAll(copiedDoc)
     @layerBlendAll(copiedDoc, copiedDoc)
-    @removeCommentoutLayers(copiedDoc) # blendの処理してから消す
+    @removeCommentoutLayers(copiedDoc, copiedDoc) # blendの処理してから消す
     @cropLayers(copiedDoc)
     @resizePsd(copiedDoc)
     @selectDocumentArea(copiedDoc)
@@ -51,6 +52,7 @@ class Baum
 
 
   clipping: (document, root) ->
+    document.resizeImage(document.width, document.height, 72, ResampleMethod.NEARESTNEIGHBOR)
     if document.selection.bounds[0].value == 0 && document.selection.bounds[1].value == 0 && document.selection.bounds[2].value == document.width.value && document.selection.bounds[3].value == document.height.value
       return
     document.selection.invert()
@@ -99,8 +101,7 @@ class Baum
 
     for layer in root.layers
       if layer.visible == false
-        removeLayers.push(layer)
-        continue
+        layer.visible = true
 
       if layer.bounds[0].value == 0 && layer.bounds[1].value == 0 && layer.bounds[2].value == 0 && layer.bounds[3].value == 0
         removeLayers.push(layer)
@@ -114,7 +115,7 @@ class Baum
         removeLayers[i].remove()
 
 
-  removeCommentoutLayers: (root) ->
+  removeCommentoutLayers: (document, root) ->
     removeLayers = []
 
     for layer in root.layers
@@ -123,7 +124,10 @@ class Baum
         continue
 
       if layer.typename == 'LayerSet'
-        @removeCommentoutLayers(layer)
+        @removeCommentoutLayers(document, layer)
+
+    if root.typename == 'LayerSet'
+      document.activeLayer = root
 
     if removeLayers.length > 0
       for i in [removeLayers.length-1..0]
@@ -162,8 +166,6 @@ class Baum
     tmp = app.activeDocument.activeLayer
     app.activeDocument.activeLayer = layer
 
-    layer.allLocked = false
-
     # LayerStyle含めてラスタライズ
     if layer.blendMode != BlendMode.OVERLAY && layer.kind != LayerKind.HUESATURATION && layer.opacity > 1
       Util.rasterizeLayerStyle(layer)
@@ -187,6 +189,14 @@ class Baum
     for i in [0...layers.length]
       layers[i].moveBefore(root)
     root.remove()
+
+  unlockAll: (root) ->
+    for layer in root.layers
+      if layer.typename == 'LayerSet'
+        @unlockAll(layer)
+      else
+        if layer.allLocked
+          layer.allLocked = false
 
   unvisibleAll: (root) ->
     for layer in root.layers
