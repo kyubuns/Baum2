@@ -1,6 +1,6 @@
 baum2
 =====
-
+## for the baum2 cocos creator version please visit https://github.com/chooaya/Baum2CocosCreator/blob/master/psd-convert-to-node/README.md
 ## Photoshop(psd) to Unity(uGUI) Library!
 
 - Photoshop
