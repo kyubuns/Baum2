@@ -14,7 +14,7 @@ namespace Baum2.Sample
         public void Start()
         {
             ui = BaumUI.Instantiate(gameObject, uiPrefab);
-            listSize = 10;
+            listSize = 100;
             ImageSample();
             ButtonSample();
             ListSample();
