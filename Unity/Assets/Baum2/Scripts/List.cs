@@ -237,7 +237,7 @@ namespace Baum2
             {
             }
 
-            if (RenderingMin == RenderingMax)
+            if (RenderingMin == RenderingMax && Count > 0)
             {
                 // 1つも描画していないときはどこから描画するか考える
                 var i = 0;
