@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="RIDER_MODULE" version="4">
-  <component name="FacetManager">
-    <facet type="android" name="Default Android Facet">
-      <configuration />
-    </facet>
-  </component>
   <component name="NewModuleRootManager">
+    <content url="file://$USER_HOME$/Library/Unity/cache/packages/packages.unity.com/com.unity.ads@2.0.8" />
+    <content url="file://$USER_HOME$/Library/Unity/cache/packages/packages.unity.com/com.unity.analytics@2.0.16" />
+    <content url="file://$USER_HOME$/Library/Unity/cache/packages/packages.unity.com/com.unity.package-manager-ui@1.9.11" />
+    <content url="file://$USER_HOME$/Library/Unity/cache/packages/packages.unity.com/com.unity.purchasing@2.0.3" />
+    <content url="file://$USER_HOME$/Library/Unity/cache/packages/packages.unity.com/com.unity.standardevents@1.0.13" />
+    <content url="file://$USER_HOME$/Library/Unity/cache/packages/packages.unity.com/com.unity.textmeshpro@1.2.4" />
     <content url="file://$MODULE_DIR$/../.." />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
