@@ -9,12 +9,15 @@ namespace Baum2.Sample
         private GameObject uiPrefab = null;
 
         private UIRoot ui;
-        private int listSize;
+        private System.Collections.Generic.List<string> listElements = new System.Collections.Generic.List<string>();
 
         public void Start()
         {
             ui = BaumUI.Instantiate(gameObject, uiPrefab);
-            listSize = 100;
+            for (var i = 0; i < 1000; ++i)
+            {
+                listElements.Add(Random.Range(0, 2) + "_" + i);
+            }
             ImageSample();
             ButtonSample();
             ListSample();
@@ -41,7 +44,8 @@ namespace Baum2.Sample
                 welcomeText.text = "Welcome to Hoge!";
                 ui.Get("Image1").SetActive(true);
                 ui.Get("Image2").SetActive(false);
-                list.Resize(++listSize);
+                listElements.Add("1_" + Random.Range(0, 1000));
+                list.Resize(listElements.Count);
             });
 
             ui.Get<Button>("FugaButton").onClick.AddListener(() =>
@@ -49,7 +53,8 @@ namespace Baum2.Sample
                 welcomeText.text = "Welcome to Fuga!";
                 ui.Get("Image1").SetActive(false);
                 ui.Get("Image2").SetActive(true);
-                list.Resize(--listSize);
+                listElements.Add("2_" + Random.Range(0, 1000));
+                list.Resize(listElements.Count);
             });
         }
 
@@ -58,10 +63,10 @@ namespace Baum2.Sample
             var list = ui.Get<List>("PiyoList");
             list.Scrollbar = ui.Get<Scrollbar>("PiyoScrollbar");
             list.LayoutGroup.Spacing = 10;
-            list.UISelector = (_) => "Item1";
+            list.UISelector = (index) => listElements[index].Split('_')[0] == "1" ? "Item1" : "Item2";
             list.UIUpdater = (listUI, index) =>
             {
-                listUI.Get<Text>("ListItemText").text = string.Format("Piyo: {0}", index);
+                listUI.Get<Text>("ListItemText").text = string.Format("{0}", listElements[index].Split('_')[1]);
 
                 var button = listUI.Get<Button>("ItemButton", true);
                 if (button != null)
@@ -69,7 +74,7 @@ namespace Baum2.Sample
                     button.onClick.AddListener(() => Debug.Log(index));
                 }
             };
-            list.Resize(listSize);
+            list.Resize(listElements.Count);
         }
 
         public void SliderSample()
