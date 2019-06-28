@@ -10,6 +10,7 @@ namespace Baum2
         [SerializeField]
         public Scroll Scroll;
 
+        private bool Initialized;
         private List Root;
         private readonly Dictionary<string, float> ElementSize = new Dictionary<string, float>();
         public float MaxElementSize { get; private set; }
@@ -31,6 +32,7 @@ namespace Baum2
 
         public RectOffset Padding;
         public float Spacing;
+        public Dictionary<string, float> SpecialPadding = new Dictionary<string, float>();
 
         private RectTransform rectTransformCache;
         private RectTransform Parent;
@@ -61,6 +63,11 @@ namespace Baum2
                 var afterSize = RectTransform.sizeDelta.y;
                 position.y = -(afterSize / 2f - beforeSize / 2f - position.y);
                 RectTransform.anchoredPosition = position;
+                if (!Initialized)
+                {
+                    Initialized = true;
+                    ResetScroll();
+                }
             }
             else if (Scroll == Scroll.Horizontal)
             {
@@ -80,6 +87,10 @@ namespace Baum2
                 var select = Root.UISelector(i);
                 var elementSize = ElementSize[select];
                 size += elementSize;
+                if (i != 0 && SpecialPadding.ContainsKey(select))
+                {
+                    size += SpecialPadding[select];
+                }
                 ElementPositions.Add(size * vector - elementSize / 2f * vector);
                 if (i != Root.Count - 1) size += Spacing;
             }
@@ -87,7 +98,8 @@ namespace Baum2
 
             var totalSize = RectTransform.sizeDelta;
             var parentRect = RectTransformParent.rect;
-            totalSize[axis] = Mathf.Max(size, axis == 0 ? parentRect.width : parentRect.height);
+            size = Mathf.Max(size, axis == 0 ? parentRect.width : parentRect.height);
+            totalSize[axis] = size;
             RectTransform.sizeDelta = totalSize;
 
             for (var i = 0; i < ElementPositions.Count; ++i)
