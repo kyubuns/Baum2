@@ -1,8 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using OnionRing;
+using Object = UnityEngine.Object;
 
 namespace Baum2.Editor
 {
@@ -95,15 +98,24 @@ namespace Baum2.Editor
             var directoryName = Path.GetFileName(Path.GetDirectoryName(asset));
             var directoryPath = Path.Combine(EditorUtil.GetBaumSpritesPath(), directoryName);
             var fileName = Path.GetFileName(asset);
+            var noSlice = fileName.EndsWith("-noslice.png", StringComparison.Ordinal);
+            fileName = fileName.Replace("-noslice.png", ".png");
             var newPath = Path.Combine(directoryPath, fileName);
 
             var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(asset);
-            var slicedTexture = TextureSlicer.Slice(texture);
+            var slicedTexture = new SlicedTexture(texture, new Boarder(0, 0, 0, 0));
+            if (!noSlice)
+            {
+                slicedTexture = TextureSlicer.Slice(texture);
+            }
             if (PreprocessTexture.SlicedTextures == null) PreprocessTexture.SlicedTextures = new Dictionary<string, SlicedTexture>();
             PreprocessTexture.SlicedTextures[fileName] = slicedTexture;
             byte[] pngData = slicedTexture.Texture.EncodeToPNG();
             File.WriteAllBytes(newPath, pngData);
-            Object.DestroyImmediate(slicedTexture.Texture);
+            if (!noSlice)
+            {
+                Object.DestroyImmediate(slicedTexture.Texture);
+            }
 
             // Debug.LogFormat("[Baum2] Slice: {0} -> {1}", EditorUtil.ToUnityPath(asset), EditorUtil.ToUnityPath(newPath));
         }

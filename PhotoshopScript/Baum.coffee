@@ -297,7 +297,7 @@ class PsdToJson
     for layer in root.layers when layer.visible
       hash = null
       name = layer.name.split("@")[0]
-      opt = @parseOption(layer.name.split("@")[1])
+      opt = Util.parseOption(layer.name.split("@")[1])
       if layer.typename == 'ArtLayer'
         hash = @layerToHash(document, name, opt, layer)
       else
@@ -394,6 +394,7 @@ class PsdToJson
       }
       hash['prefab'] = opt['prefab'] if opt['prefab']
       hash['background'] = true if opt['background']
+      hash['slice'] = opt['slice'] if opt['slice']
     hash['pivot'] = opt['pivot'] if opt['pivot']
     hash['stretchx'] = opt['stretchx'] if opt['stretchx']
     hash['stretchy'] = opt['stretchy'] if opt['stretchy']
@@ -498,8 +499,11 @@ class PsdToImage
 
     layer.opacity = 100.0
     fileName = Util.layerToImageName(layer)
+    opt = Util.parseOption(layer.name.split("@")[1])
     if fileName in fileNames
       alert("#{fileName}と同名のレイヤーが存在します。レイヤー名を変更してください。")
+    if opt['slice'] == 'false'
+      fileName += "-noslice"
     fileNames.push(fileName)
     saveFile = new File("#{@baseFolder.fsName}/#{fileName}.png")
     options = new ExportOptionsSaveForWeb()
@@ -798,6 +802,16 @@ class Util
       desc15 = new ActionDescriptor()
       executeAction( idMrgtwo, desc15, DialogModes.NO )
     catch e
+
+  @parseOption: (text) ->
+    return {} unless text
+    opt = {}
+    for optText in text.split(",")
+      elements = optText.split("=")
+      elements[1] = 'true' if elements.length == 1
+      opt[elements[0].toLowerCase()] = elements[1].toLowerCase()
+    return opt
+
 
 
 String.prototype.startsWith = (str) ->

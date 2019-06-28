@@ -424,7 +424,7 @@
         }
         hash = null;
         name = layer.name.split("@")[0];
-        opt = this.parseOption(layer.name.split("@")[1]);
+        opt = Util.parseOption(layer.name.split("@")[1]);
         if (layer.typename === 'ArtLayer') {
           hash = this.layerToHash(document, name, opt, layer);
         } else {
@@ -535,6 +535,9 @@
         }
         if (opt['background']) {
           hash['background'] = true;
+        }
+        if (opt['slice']) {
+          hash['slice'] = opt['slice'];
         }
       }
       if (opt['pivot']) {
@@ -718,7 +721,7 @@
     };
 
     PsdToImage.prototype.outputLayer = function(doc, layer) {
-      var fileName, options, saveFile;
+      var fileName, opt, options, saveFile;
       if (!layer.isBackgroundLayer) {
         layer.translate(-layer.bounds[0], -layer.bounds[1]);
         doc.resizeCanvas(layer.bounds[2] - layer.bounds[0], layer.bounds[3] - layer.bounds[1], AnchorPosition.TOPLEFT);
@@ -726,8 +729,12 @@
       }
       layer.opacity = 100.0;
       fileName = Util.layerToImageName(layer);
+      opt = Util.parseOption(layer.name.split("@")[1]);
       if (indexOf.call(fileNames, fileName) >= 0) {
         alert(fileName + "と同名のレイヤーが存在します。レイヤー名を変更してください。");
+      }
+      if (opt['slice'] === 'false') {
+        fileName += "-noslice";
       }
       fileNames.push(fileName);
       saveFile = new File(this.baseFolder.fsName + "/" + fileName + ".png");
@@ -1115,6 +1122,24 @@
       } catch (error) {
         e = error;
       }
+    };
+
+    Util.parseOption = function(text) {
+      var elements, j, len, opt, optText, ref1;
+      if (!text) {
+        return {};
+      }
+      opt = {};
+      ref1 = text.split(",");
+      for (j = 0, len = ref1.length; j < len; j++) {
+        optText = ref1[j];
+        elements = optText.split("=");
+        if (elements.length === 1) {
+          elements[1] = 'true';
+        }
+        opt[elements[0].toLowerCase()] = elements[1].toLowerCase();
+      }
+      return opt;
     };
 
     return Util;
