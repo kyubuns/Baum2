@@ -518,7 +518,7 @@ namespace Baum2.Editor
 
         private GameObject CreateDummyMaskImage(Renderer renderer)
         {
-            var maskElement = elements.Find(x => (x is ImageElement && x.name == "Area"));
+            var maskElement = elements.Find(x => (x is ImageElement && x.name.Equals("Area", StringComparison.OrdinalIgnoreCase)));
             if (maskElement == null) throw new Exception(string.Format("{0} Area not found", name));
             elements.Remove(maskElement);
 
@@ -583,7 +583,7 @@ namespace Baum2.Editor
                 if (fillRect != null || image == null) return;
 
                 g.GetComponent<Image>().raycastTarget = false;
-                if (element.name == "Fill") fillRect = g.GetComponent<RectTransform>();
+                if (element.name.Equals("Fill", StringComparison.OrdinalIgnoreCase)) fillRect = g.GetComponent<RectTransform>();
             });
 
             var slider = go.AddComponent<Slider>();
@@ -621,7 +621,7 @@ namespace Baum2.Editor
             {
                 var image = element as ImageElement;
                 if (handleRect != null || image == null) return;
-                if (element.name == "Handle") handleRect = g.GetComponent<RectTransform>();
+                if (element.name.Equals("Handle", StringComparison.OrdinalIgnoreCase)) handleRect = g.GetComponent<RectTransform>();
                 g.GetComponent<Image>().raycastTarget = false;
             });
 
@@ -664,7 +664,7 @@ namespace Baum2.Editor
                 var image = element as ImageElement;
                 if (image == null) return;
                 if (lastImage == null) lastImage = g.GetComponent<Image>();
-                if (element.name.Contains("Check")) checkImage = g.GetComponent<Image>();
+                if (element.name.Contains("Check") || element.name.Contains("check")) checkImage = g.GetComponent<Image>();
             });
 
             var toggle = go.AddComponent<Toggle>();
