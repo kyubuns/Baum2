@@ -241,12 +241,20 @@ namespace Baum2
             {
                 // 1つも描画していないときはどこから描画するか考える
                 var i = 0;
+                var created = false;
                 for (i = 0; i < Count; ++i)
                 {
-                    if (TryCreate(i)) break;
+                    if (TryCreate(i))
+                    {
+                        created = true;
+                        break;
+                    }
                 }
-                RenderingMin = i - 1;
-                RenderingMax = i + 1;
+                if (created)
+                {
+                    RenderingMin = i - 1;
+                    RenderingMax = i + 1;
+                }
             }
 
             while (TryCreate(RenderingMin))
