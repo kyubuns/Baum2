@@ -90,4 +90,4 @@ UIの一部をアニメーションさせたい場合などは、Photoshop上の
 ## Developed by
 
 * Unity: Unity2017, Unity2018, Unity2019
-* PhotoshopScript: Adobe Photoshop CC 2018
+* PhotoshopScript: Adobe Photoshop CC 2018, Adobe Photoshop CC 2019
