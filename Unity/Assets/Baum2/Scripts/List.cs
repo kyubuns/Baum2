@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -175,7 +175,7 @@ namespace Baum2
 
             var transform1 = item.transform;
             var p = transform1.localPosition;
-            p.y = LayoutGroup.ElementPositions[index];
+            p = LayoutGroup.ElementPositions[index];
             transform1.localPosition = p;
         }
 
@@ -224,8 +224,8 @@ namespace Baum2
             {
                 RectTransform.GetLocalCorners(fourCornersArray);
                 var localToWorldMatrix = RectTransform.localToWorldMatrix;
-                fourCornersArray[0] = localToWorldMatrix.MultiplyPoint(fourCornersArray[0] - new Vector3(LayoutGroup.MaxElementSize, LayoutGroup.MaxElementSize));
-                fourCornersArray[2] = localToWorldMatrix.MultiplyPoint(fourCornersArray[2] + new Vector3(LayoutGroup.MaxElementSize, LayoutGroup.MaxElementSize));
+                fourCornersArray[0] = localToWorldMatrix.MultiplyPoint(fourCornersArray[0] - new Vector3(LayoutGroup.MaxElementSize.x, LayoutGroup.MaxElementSize.y));
+                fourCornersArray[2] = localToWorldMatrix.MultiplyPoint(fourCornersArray[2] + new Vector3(LayoutGroup.MaxElementSize.x, LayoutGroup.MaxElementSize.y));
             }
             worldCornersEdge[0] = fourCornersArray[0];
             worldCornersEdge[1] = fourCornersArray[2];
@@ -268,7 +268,9 @@ namespace Baum2
         private bool TryCreate(int index)
         {
             if (index < 0 || Count <= index) return false;
-            var p = RectTransform.TransformPoint(new Vector3(0f, ContentRectTransform.localPosition.y + LayoutGroup.ElementPositions[index], 0f));
+            var x = ContentRectTransform.localPosition.x + LayoutGroup.ElementPositions[index].x;
+            var y = ContentRectTransform.localPosition.y + LayoutGroup.ElementPositions[index].y;
+            var p = RectTransform.TransformPoint(new Vector3(x, y, 0f));
             if (worldCornersEdge[0].y < p.y && p.y < worldCornersEdge[1].y)
             {
                 AddItem(index);
@@ -280,7 +282,9 @@ namespace Baum2
         private bool TryDelete(int index)
         {
             if (index <= RenderingMin || RenderingMax <= index) return false;
-            var p = RectTransform.TransformPoint(new Vector3(0f, ContentRectTransform.localPosition.y + LayoutGroup.ElementPositions[index], 0f));
+            var x = ContentRectTransform.localPosition.x + LayoutGroup.ElementPositions[index].x;
+            var y = ContentRectTransform.localPosition.y + LayoutGroup.ElementPositions[index].y;
+            var p = RectTransform.TransformPoint(new Vector3(x, y, 0f));
             if (!(worldCornersEdge[0].y < p.y && p.y < worldCornersEdge[1].y))
             {
                 ToPool(index);
@@ -312,3 +316,4 @@ namespace Baum2
         }
     }
 }
+

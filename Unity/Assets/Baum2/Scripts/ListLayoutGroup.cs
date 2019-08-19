@@ -12,9 +12,9 @@ namespace Baum2
 
         private bool Initialized;
         private List Root;
-        private readonly Dictionary<string, float> ElementSize = new Dictionary<string, float>();
-        public float MaxElementSize { get; private set; }
-        public List<float> ElementPositions { get; private set; }
+        private readonly Dictionary<string, Vector2> ElementSize = new Dictionary<string, Vector2>();
+        public Vector2 MaxElementSize { get; private set; }
+        public List<Vector2> ElementPositions { get; private set; }
 
         public void Initialize(List root)
         {
@@ -22,9 +22,9 @@ namespace Baum2
             foreach (var itemSource in Root.ItemSources)
             {
                 var child = itemSource.transform as RectTransform;
-                if (child != null) ElementSize[itemSource.name] = child.rect.height;
+                if (child != null) ElementSize[itemSource.name] = new Vector2(child.rect.width, child.rect.height);
             }
-            MaxElementSize = ElementSize.Values.Max();
+            MaxElementSize = new Vector2(ElementSize.Values.Max(s => s.x), ElementSize.Values.Max(s => s.y));
 
             RectTransformParent = RectTransform.parent.GetComponent<RectTransform>();
             Parent = transform.parent.GetComponent<RectTransform>();
@@ -71,35 +71,55 @@ namespace Baum2
             }
             else if (Scroll == Scroll.Horizontal)
             {
-                throw new NotImplementedException();
+                var beforeSize = RectTransform.sizeDelta.x;
+                var position = RectTransform.anchoredPosition;
+                RecalcSizeInternal(0, +1, Padding.left, Padding.right);
+                var afterSize = RectTransform.sizeDelta.x;
+                position.x = -(afterSize / 2f - beforeSize / 2f - position.x);
+                RectTransform.anchoredPosition = position;
+                if (!Initialized)
+                {
+                    Initialized = true;
+                    ResetScroll();
+                }
             }
         }
 
         private void RecalcSizeInternal(int axis, int vector, float paddingStart, float paddingEnd)
         {
-            if (ElementPositions == null) ElementPositions = new List<float>();
+            if (ElementPositions == null) ElementPositions = new List<Vector2>();
             ElementPositions.Clear();
 
-            var size = 0.0f;
-            size += paddingStart;
+            var size = Vector2.zero;
+            size[axis] += paddingStart;
             for (var i = 0; i < Root.Count; ++i)
             {
                 var select = Root.UISelector(i);
                 var elementSize = ElementSize[select];
-                size += elementSize;
+                if (axis == 0)
+                {
+                    size[1] = Mathf.Max(size[1], elementSize[1]);
+                }
+                else
+                {
+                    size[0] = Mathf.Max(size[0], elementSize[0]);
+                }
+                size[axis] += elementSize[axis];
                 if (i != 0 && SpecialPadding.ContainsKey(select))
                 {
-                    size += SpecialPadding[select];
+                    size[axis] += SpecialPadding[select];
                 }
-                ElementPositions.Add(size * vector - elementSize / 2f * vector);
-                if (i != Root.Count - 1) size += Spacing;
+                var posx = (axis == 0)? size.x * vector - elementSize.x / 2f * vector : elementSize.x / 2f * vector;
+                var posy = (axis == 1)? size.y * vector - elementSize.y / 2f * vector : elementSize.y / 2f * vector;
+                ElementPositions.Add(new Vector2(posx, posy));
+                if (i != Root.Count - 1) size[axis] += Spacing;
             }
-            size += paddingEnd;
+            size[axis] += paddingEnd;
 
             var totalSize = RectTransform.sizeDelta;
             var parentRect = RectTransformParent.rect;
-            size = Mathf.Max(size, axis == 0 ? parentRect.width : parentRect.height);
-            totalSize[axis] = size;
+            size[axis] = Mathf.Max(size[axis], axis == 0 ? parentRect.width : parentRect.height);
+            totalSize = size;
             RectTransform.sizeDelta = totalSize;
 
             for (var i = 0; i < ElementPositions.Count; ++i)
@@ -131,3 +151,4 @@ namespace Baum2
         Horizontal
     }
 }
+
