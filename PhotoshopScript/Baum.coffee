@@ -52,7 +52,7 @@ class Baum
 
 
   clipping: (document, root) ->
-    document.resizeImage(document.width, document.height, 72, ResampleMethod.NEARESTNEIGHBOR)
+    document.resizeImage(document.width, document.height, 72, ResampleMethod.BICUBICAUTOMATIC)
     if document.selection.bounds[0].value == 0 && document.selection.bounds[1].value == 0 && document.selection.bounds[2].value == document.width.value && document.selection.bounds[3].value == document.height.value
       return
     document.selection.invert()
@@ -93,7 +93,7 @@ class Baum
 
     width = width / tmp
     height = height / tmp
-    doc.resizeImage(width, height, doc.resolution, ResampleMethod.NEARESTNEIGHBOR)
+    doc.resizeImage(width, height, doc.resolution, ResampleMethod.BICUBICAUTOMATIC)
 
 
   removeUnvisibleLayers: (root) ->

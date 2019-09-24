@@ -74,7 +74,7 @@
 
     Baum.prototype.clipping = function(document, root) {
       var h, w, x1, x2, y1, y2;
-      document.resizeImage(document.width, document.height, 72, ResampleMethod.NEARESTNEIGHBOR);
+      document.resizeImage(document.width, document.height, 72, ResampleMethod.BICUBICAUTOMATIC);
       if (document.selection.bounds[0].value === 0 && document.selection.bounds[1].value === 0 && document.selection.bounds[2].value === document.width.value && document.selection.bounds[3].value === document.height.value) {
         return;
       }
@@ -128,7 +128,7 @@
       }
       width = width / tmp;
       height = height / tmp;
-      return doc.resizeImage(width, height, doc.resolution, ResampleMethod.NEARESTNEIGHBOR);
+      return doc.resizeImage(width, height, doc.resolution, ResampleMethod.BICUBICAUTOMATIC);
     };
 
     Baum.prototype.removeUnvisibleLayers = function(root) {
