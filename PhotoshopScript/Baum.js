@@ -41,6 +41,7 @@
       }
       this.documentName = app.activeDocument.name.slice(0, -4);
       copiedDoc = app.activeDocument.duplicate(app.activeDocument.name.slice(0, -4) + '.copy.psd');
+      copiedDoc.quickMaskMode = false;
       Util.deselectLayers();
       this.removeUnvisibleLayers(copiedDoc);
       this.unlockAll(copiedDoc);

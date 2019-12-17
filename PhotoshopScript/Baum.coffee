@@ -23,6 +23,7 @@ class Baum
     @documentName = app.activeDocument.name[0..-5]
 
     copiedDoc = app.activeDocument.duplicate(app.activeDocument.name[..-5] + '.copy.psd')
+    copiedDoc.quickMaskMode = false
     Util.deselectLayers()
     @removeUnvisibleLayers(copiedDoc)
     @unlockAll(copiedDoc)
