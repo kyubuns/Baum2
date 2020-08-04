@@ -3,7 +3,7 @@ using UnityEngine.Assertions;
 
 namespace Baum2
 {
-    public class UIRoot : MonoBehaviour
+    public class UIRoot : MonoBehaviour, IMapper
     {
         private Cache cache;
 
@@ -15,6 +15,11 @@ namespace Baum2
         public void Awake()
         {
             cache = GetComponent<Cache>();
+        }
+
+        public GameObject Get()
+        {
+            return gameObject;
         }
 
         public GameObject Get(string gameObjectName, bool noError = false)
@@ -80,6 +85,11 @@ namespace Baum2
             return uiRoot;
         }
 
+        public IMapper GetChildMap(string prefix)
+        {
+            return new UIMapper(this, prefix);
+        }
+
         public void RecalculateBounds()
         {
             RecalculateBounds(new Vector2(0f, 0f));
@@ -90,6 +100,58 @@ namespace Baum2
             var rootTransform = gameObject.GetComponent<RectTransform>();
             var bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(rootTransform);
             rootTransform.sizeDelta = new Vector2(rootTransform.sizeDelta.x + margin.x, bounds.size.y + margin.y);
+        }
+    }
+
+    public interface IMapper
+    {
+        GameObject Get();
+        GameObject Get(string gameObjectName, bool noError = false);
+        T Get<T>(string gameObjectName) where T : Component;
+        T Get<T>(string gameObjectName, bool noError) where T : Component;
+        IMapper GetChildMap(string prefix);
+        T GetComponent<T>();
+    }
+
+    public class UIMapper : IMapper
+    {
+        private readonly UIRoot Root;
+        private readonly string Prefix;
+
+        public UIMapper(UIRoot root, string prefix)
+        {
+            Root = root;
+            Prefix = prefix;
+        }
+
+        public GameObject Get()
+        {
+            return Root.Get($"{Prefix}");
+        }
+
+        public GameObject Get(string gameObjectName, bool noError = false)
+        {
+            return Root.Get($"{Prefix}/{gameObjectName}", noError);
+        }
+
+        public T Get<T>(string gameObjectName) where T : Component
+        {
+            return Root.Get<T>($"{Prefix}/{gameObjectName}");
+        }
+
+        public T Get<T>(string gameObjectName, bool noError) where T : Component
+        {
+            return Root.Get<T>($"{Prefix}/{gameObjectName}", noError);
+        }
+
+        public IMapper GetChildMap(string prefix)
+        {
+            return new UIMapper(Root, $"{Prefix}/{prefix}");
+        }
+
+        public T GetComponent<T>()
+        {
+            return Get().GetComponent<T>();
         }
     }
 }
