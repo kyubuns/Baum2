@@ -151,4 +151,3 @@ namespace Baum2
         Horizontal
     }
 }
-
