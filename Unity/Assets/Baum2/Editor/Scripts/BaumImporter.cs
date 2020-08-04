@@ -31,11 +31,16 @@ namespace Baum2.Editor
             {
                 if (!asset.Contains(EditorUtil.ImportDirectoryPath)) continue;
                 if (!asset.EndsWith(".png", System.StringComparison.Ordinal)) continue;
-                SliceSprite(asset);
+                var assetPath = SliceSprite(asset);
+                AssetDatabase.ImportAsset(assetPath);
                 changed = true;
             }
 
-            if (changed) AssetDatabase.Refresh();
+            if (changed)
+            {
+                Debug.Log("AssetDatabase.Refresh();");
+                AssetDatabase.Refresh();
+            }
 
             EditorApplication.delayCall += () =>
             {
@@ -60,7 +65,10 @@ namespace Baum2.Editor
                     var fontRootPath = EditorUtil.ToUnityPath(EditorUtil.GetBaumFontsPath());
                     var creator = new PrefabCreator(spriteRootPath, fontRootPath, asset);
                     var go = creator.Create();
-                    var savePath = EditorUtil.ToUnityPath(Path.Combine(EditorUtil.GetBaumPrefabsPath(), name + ".prefab"));
+                    // sh専用処理
+                    var saveDirectoryPath = Path.Combine(Application.dataPath, "Asset Bundles", $"Baum UI {name}");
+                    Directory.CreateDirectory(saveDirectoryPath);
+                    var savePath = EditorUtil.ToUnityPath(Path.Combine(saveDirectoryPath, name + ".prefab"));
 #if UNITY_2018_3_OR_NEWER
                     PrefabUtility.SaveAsPrefabAsset(go, savePath);
 #else
@@ -93,7 +101,7 @@ namespace Baum2.Editor
             }
         }
 
-        private static void SliceSprite(string asset)
+        private static string SliceSprite(string asset)
         {
             var directoryName = Path.GetFileName(Path.GetDirectoryName(asset));
             var directoryPath = Path.Combine(EditorUtil.GetBaumSpritesPath(), directoryName);
@@ -118,6 +126,7 @@ namespace Baum2.Editor
             }
 
             // Debug.LogFormat("[Baum2] Slice: {0} -> {1}", EditorUtil.ToUnityPath(asset), EditorUtil.ToUnityPath(newPath));
+            return EditorUtil.ToUnityPath(newPath);
         }
     }
 }
