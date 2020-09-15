@@ -121,6 +121,13 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "dev.kyubuns.ankuchen": {
+      "version": "https://git@github.com/kyubuns/AnKuchen.git?path=Unity/Assets/AnKuchen",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "ded727ba5fc60b1a8df8b23dc1cb5055a1562a9f"
+    },
     "nuget.mono-cecil": {
       "version": "0.1.6-preview",
       "depth": 1,

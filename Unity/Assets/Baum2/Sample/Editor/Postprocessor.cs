@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using Baum2.Editor;
+using AnKuchen.Map;
 
 namespace Baum2.Sample
 {
@@ -10,11 +10,8 @@ namespace Baum2.Sample
         {
             Debug.Log("Sample Postprocess");
 
-            foreach (var button in go.GetComponentsInChildren<Button>())
-            {
-                var nav = new Navigation {mode = Navigation.Mode.None};
-                button.navigation = nav;
-            }
+            var uiCache = go.AddComponent<UICache>();
+            uiCache.CreateCache();
         }
     }
 }
