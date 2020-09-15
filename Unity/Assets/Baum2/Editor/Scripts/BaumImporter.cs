@@ -65,10 +65,7 @@ namespace Baum2.Editor
                     var fontRootPath = EditorUtil.ToUnityPath(EditorUtil.GetBaumFontsPath());
                     var creator = new PrefabCreator(spriteRootPath, fontRootPath, asset);
                     var go = creator.Create();
-                    // sh専用処理
-                    var saveDirectoryPath = Path.Combine(Application.dataPath, "Asset Bundles", $"Baum UI {name}");
-                    Directory.CreateDirectory(saveDirectoryPath);
-                    var savePath = EditorUtil.ToUnityPath(Path.Combine(saveDirectoryPath, name + ".prefab"));
+                    var savePath = EditorUtil.ToUnityPath(Path.Combine(EditorUtil.GetBaumPrefabsPath(), name + ".prefab"));
 #if UNITY_2018_3_OR_NEWER
                     PrefabUtility.SaveAsPrefabAsset(go, savePath);
 #else
