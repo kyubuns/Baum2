@@ -45,12 +45,8 @@ namespace Baum2.Editor
             var root = rootElement.Render(renderer);
             root.AddComponent<Canvas>();
             root.AddComponent<GraphicRaycaster>();
-            root.AddComponent<UIRoot>();
 
             Postprocess(root);
-
-            var cache = root.AddComponent<Cache>();
-            cache.CreateCache(root.transform);
 
             return root;
         }

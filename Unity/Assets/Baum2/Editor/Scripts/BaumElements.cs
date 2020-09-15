@@ -353,9 +353,11 @@ namespace Baum2.Editor
             rect.anchoredPosition = renderer.CalcPosition(canvasPosition, sizeDelta);
             rect.sizeDelta = sizeDelta;
 
+            /*
             var raw = go.AddComponent<RawData>();
             raw.Info["font_size"] = fontSize;
             raw.Info["align"] = align;
+            */
 
             var text = go.AddComponent<Text>();
             text.text = message;
@@ -486,6 +488,7 @@ namespace Baum2.Editor
             var scrollRect = go.AddComponent<ScrollRect>();
             scrollRect.content = content.GetComponent<RectTransform>();
 
+            /*
             var layoutGroup = content.AddComponent<ListLayoutGroup>();
             if (scroll == "vertical")
             {
@@ -499,6 +502,7 @@ namespace Baum2.Editor
                 scrollRect.horizontal = true;
                 layoutGroup.Scroll = Scroll.Horizontal;
             }
+            */
         }
 
         private void SetMaskImage(Renderer renderer, GameObject go, GameObject content)
@@ -560,9 +564,11 @@ namespace Baum2.Editor
 
         private void SetupList(GameObject go, List<GameObject> itemSources, GameObject content)
         {
+            /*
             var list = go.AddComponent<List>();
             list.ItemSources = itemSources;
             list.LayoutGroup = content.GetComponent<ListLayoutGroup>();
+            */
         }
     }
 
