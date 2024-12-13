@@ -6,8 +6,6 @@ Photoshop(psd) to Unity(uGUI) Library!
 There are no plans to update this library with additional features in the future.
 I am currently developing [AkyuiUnity(AdobeXD to Unity)](https://github.com/kyubuns/AkyuiUnity).
 
-<a href="https://www.buymeacoffee.com/kyubuns" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
-
 - Photoshop
 <img src="https://user-images.githubusercontent.com/961165/50334464-b9d5e680-054b-11e9-90ce-bfe14518d079.png" width="480">
 
